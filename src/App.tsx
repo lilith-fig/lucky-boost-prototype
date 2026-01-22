@@ -6,7 +6,6 @@ import { PackDetailScreen } from './game/screens/PackDetailScreen';
 import { PackOpeningScreen } from './game/screens/PackOpeningScreen';
 import { CardBackScreen } from './game/screens/CardBackScreen';
 import { CardRevealScreen } from './game/screens/CardRevealScreen';
-import { KeepOrSellScreen } from './game/screens/KeepOrSellScreen';
 import { RewardPopup } from './game/screens/RewardPopup';
 import type { Screen } from './game/types';
 import './App.css';
@@ -43,8 +42,6 @@ function App() {
         return <CardBackScreen />;
       case 'cardReveal':
         return <CardRevealScreen />;
-      case 'keepOrSell':
-        return <KeepOrSellScreen />;
       default:
         return <HomeScreen />;
     }

@@ -106,10 +106,6 @@ export function PackDetailScreen() {
                 <span className="pack-info-label">Cards per pack</span>
                 <span className="pack-info-value">1</span>
               </div>
-              <div className="pack-info-item">
-                <span className="pack-info-label">Tier</span>
-                <span className="pack-info-value">{pack.tier.charAt(0).toUpperCase() + pack.tier.slice(1)}</span>
-              </div>
             </div>
 
             <div className="pack-divider"></div>

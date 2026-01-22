@@ -21,7 +21,7 @@
 .pack-detail-layout {
   display: flex;
   grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-2xl);
+  gap: 24px;
   align-items: start;
   max-width: 100%;
   height: 493px;
@@ -102,7 +102,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
-  width: 532px;
+  width: 470px;
   height: 100%;
   padding-top: 48px;
   padding-bottom: 16px;
@@ -110,6 +110,9 @@
   padding-right: 24px;
   justify-content: flex-start;
   align-items: flex-start;
+  border-radius: 8px;
+  border: 1px solid var(--global-neutral-grey-70, #222);
+  background: var(--global-neutral-grey-90, #101010);
 }
 
 .pack-detail-name {
@@ -157,6 +160,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+  width: 100%;
 }
 
 .pack-info-item {
@@ -183,6 +187,7 @@
   flex-direction: column;
   gap: var(--spacing-md);
   margin-top: var(--spacing-sm);
+  width: 100%;
 }
 
 .pack-odds-header-wrapper {
@@ -190,6 +195,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-md);
+  width: 100%;
 }
 
 .pack-odds-title {

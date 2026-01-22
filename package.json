@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "list-cards": "node scripts/list-card-images.js",
+    "predev": "node scripts/list-card-images.js",
+    "prebuild": "node scripts/list-card-images.js"
   },
   "dependencies": {
     "react": "^18.2.0",

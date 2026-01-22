@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { gameStore } from '../game/store';
 import { LuckyBoostHeaderMeter } from '../lucky-boost/LuckyBoostHeaderMeter';
+import { useLuckyBoost } from '../lucky-boost/useLuckyBoost';
 import { Logo } from './Logo';
 import { CurrencyIcon } from './CurrencyIcon';
 import { Button } from '../design-system/Button';
@@ -9,6 +10,7 @@ import './Header.css';
 
 export function Header() {
   const [state, setState] = useState(gameStore.getState());
+  const luckyBoostState = useLuckyBoost();
   const [showBalanceDropdown, setShowBalanceDropdown] = useState(false);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const balanceDropdownRef = useRef<HTMLDivElement>(null);
@@ -35,7 +37,7 @@ export function Header() {
         
         <div className="header-right">
           {/* Lucky Boost - compact passive indicator */}
-          <LuckyBoostHeaderMeter progress={state.luckyBoostProgress} />
+          <LuckyBoostHeaderMeter progress={luckyBoostState.currentProgress} />
           
           {/* USDC Balance and Profile - share same dropdown */}
           <div 

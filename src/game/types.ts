@@ -27,6 +27,7 @@ export interface PackOpenResult {
   packPrice: number;
   isWin: boolean; // cardValue >= packPrice
   timestamp: number;
+  theme: 'pokemon' | 'onepiece';
 }
 
 export interface GameState {
@@ -34,10 +35,11 @@ export interface GameState {
   credits: number; // Credits balance (legacy, may be used for other features)
   packsOpened: number;
   luckyBoostProgress: number; // 0-100, with overflow
-  currentScreen: 'home' | 'packDetail' | 'opening' | 'cardBack' | 'cardReveal' | 'keepOrSell' | 'reward';
+  currentScreen: 'home' | 'packDetail' | 'opening' | 'cardBack' | 'cardReveal' | 'reward';
   selectedPack: Pack | null;
   lastResult: PackOpenResult | null;
   showRewardPopup: boolean;
+  inventory: Card[]; // Collection of kept cards
 }
 
 export type Screen = GameState['currentScreen'];

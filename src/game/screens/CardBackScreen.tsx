@@ -4,6 +4,8 @@ import './CardBackScreen.css';
 
 export function CardBackScreen() {
   const [isFlipping, setIsFlipping] = useState(false);
+  const state = gameStore.getState();
+  const theme = state.selectedPack?.theme ?? 'pokemon';
 
   const handleCardClick = () => {
     if (isFlipping) return;
@@ -14,18 +16,19 @@ export function CardBackScreen() {
     }, 600);
   };
 
+
+  const cardBackImage = theme === 'one-piece' ? '/card-back-op.png' : '/card-back-pkm.png';
+
   return (
     <div className="card-back-screen">
       <div className="card-container">
-        <div 
-          className={`card-back ${isFlipping ? 'flipping' : ''}`}
+        <img 
+          src={cardBackImage} 
+          alt="Card back" 
+          className={`card-back-image ${isFlipping ? 'flipping' : ''}`}
           onClick={handleCardClick}
-        >
-          <div className="card-back-inner">
-            <div className="card-back-pattern"></div>
-            <p className="card-back-hint">Tap to reveal</p>
-          </div>
-        </div>
+        />
+        <p className="card-back-hint">Tap to reveal</p>
       </div>
     </div>
   );

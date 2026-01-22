@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { gameStore } from '../store';
 import { ResultLuckyBoostMeter } from '../components/ResultLuckyBoostMeter';
 import { RewardModal } from '../components/RewardModal';
+import { Button } from '../../design-system/Button';
+import { getRandomCardImageUrl } from '../utils/cardImages';
+import { formatCurrency } from '../../utils/formatCurrency';
 import './CardRevealScreen.css';
 
 export function CardRevealScreen() {
@@ -12,6 +15,7 @@ export function CardRevealScreen() {
   const [progressAdded, setProgressAdded] = useState(0);
   const [isMeterFull, setIsMeterFull] = useState(false);
   const [showRewardModal, setShowRewardModal] = useState(false);
+  const [showKeepSell, setShowKeepSell] = useState(false);
   const result = state.lastResult;
 
   useEffect(() => {
@@ -63,13 +67,10 @@ export function CardRevealScreen() {
               setShowRewardModal(true);
             }, 1200);
           } else {
-            // Auto-dismiss meter after animation completes (no user interaction needed)
+            // Auto-dismiss meter after animation completes, then show Keep/Sell on this screen
             setTimeout(() => {
               setShowMeter(false);
-              // Navigate to keep or sell after meter dismisses
-              setTimeout(() => {
-                gameStore.navigateTo('keepOrSell');
-              }, 400);
+              setTimeout(() => setShowKeepSell(true), 400);
             }, 1000);
           }
         }
@@ -83,17 +84,16 @@ export function CardRevealScreen() {
 
   const handleRewardClose = () => {
     setShowRewardModal(false);
-    gameStore.claimReward('credits');
-    setTimeout(() => {
-      gameStore.navigateTo('keepOrSell');
-    }, 300);
+    gameStore.claimRewardCreditsOnly();
+    setTimeout(() => setShowKeepSell(true), 300);
   };
 
   if (!result) {
     return null;
   }
 
-  const { card } = result;
+  const { card, theme } = result;
+  const cardImageUrl = useMemo(() => getRandomCardImageUrl(theme), [theme]);
 
   return (
     <div className="card-reveal-screen">
@@ -105,17 +105,36 @@ export function CardRevealScreen() {
       {/* Card presentation - primary focus */}
       <div className="card-presentation">
         <div className="card-container">
-          <div className="card-image-wrapper">
-            {/* Static card image - using fallback for prototype */}
-            <div className="card-image-fallback">
-              <div className="card-fallback-content">
-                <div className="card-fallback-icon">🃏</div>
-                <div className="card-fallback-name">{card.name}</div>
-                <div className="card-fallback-rarity">{card.rarity.toUpperCase()}</div>
-              </div>
-            </div>
+          {cardImageUrl ? (
+            <img
+              src={cardImageUrl}
+              alt={card.name}
+              className="card-image"
+            />
+          ) : null}
+          <div className="card-price">
+            ${formatCurrency(card.value)}
           </div>
         </div>
+
+        {showKeepSell && (
+          <div className="card-reveal-actions">
+            <Button
+              variant="secondary"
+              size="large"
+              onClick={() => gameStore.keepCard()}
+            >
+              Keep
+            </Button>
+            <Button
+              variant="primary"
+              size="large"
+              onClick={() => gameStore.sellCard()}
+            >
+              Sell for ${formatCurrency(card.value)}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Lucky Boost Meter - appears in corner */}
@@ -128,7 +147,7 @@ export function CardRevealScreen() {
           onDismiss={() => {
             if (!isMeterFull) {
               setShowMeter(false);
-              gameStore.navigateTo('keepOrSell');
+              setShowKeepSell(true);
             }
           }}
         />

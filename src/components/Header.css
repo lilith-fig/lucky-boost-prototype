@@ -131,7 +131,7 @@
 /* Balance Dropdown */
 .balance-dropdown {
   position: absolute;
-  top: calc(100% + 2px); /* Smaller gap for easier cursor movement */
+  top: calc(100% + 16px);
   right: 0;
   min-width: 200px;
   background: var(--global-neutral-grey-80);
@@ -148,10 +148,10 @@
 .balance-dropdown::before {
   content: '';
   position: absolute;
-  top: -2px;
+  top: -16px;
   left: 0;
   right: 0;
-  height: 2px;
+  height: 16px;
   background: transparent;
 }
 

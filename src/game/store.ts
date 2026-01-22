@@ -1,5 +1,7 @@
 import { GameState, PackOpenResult } from './types';
 import { generateCard, PACKS } from './packs';
+import { luckyBoostStore } from '../lucky-boost/store';
+import { MILESTONES } from '../lucky-boost/types';
 
 const STORAGE_KEY = 'gachaGameState';
 
@@ -12,6 +14,7 @@ const defaultState: GameState = {
   selectedPack: null,
   lastResult: null,
   showRewardPopup: false,
+  inventory: [], // Collection of kept cards
 };
 
 function loadState(): GameState {
@@ -74,19 +77,18 @@ class GameStore {
 
   // Lucky Boost calculation (as per requirements)
   calculateLuckyBoostProgress(packPrice: number, cardValue: number): number {
-    // Volume bonus: +2% per pack opened
-    const volumeBonus = 2;
-    
-    // Loss bonus calculation
+    // Only losses can build up lucky boost progress
     const isWin = cardValue >= packPrice;
-    let lossBonus = 0;
     
-    if (!isWin) {
-      const lossRatio = (packPrice - cardValue) / packPrice;
-      lossBonus = Math.min(12, Math.round(lossRatio * 12));
+    if (isWin) {
+      return 0; // Wins don't contribute to progress
     }
     
-    return volumeBonus + lossBonus;
+    // Loss bonus calculation
+    const lossRatio = (packPrice - cardValue) / packPrice;
+    const lossBonus = Math.min(12, Math.round(lossRatio * 12));
+    
+    return lossBonus;
   }
 
   // Open a pack
@@ -108,26 +110,39 @@ class GameStore {
     this.state.usdcBalance -= pack.price;
     this.state.packsOpened += 1;
 
-    // Calculate Lucky Boost progress
-    const progressAdded = this.calculateLuckyBoostProgress(pack.price, card.value);
-    let newProgress = this.state.luckyBoostProgress + progressAdded;
+    // Update Lucky Boost progress in the lucky boost store
+    const { progressAdded, milestonesReached } = luckyBoostStore.addPackOpen(
+      pack.price,
+      card.value
+    );
     
-    // Handle overflow (carry over if > 100%)
-    let overflow = 0;
-    if (newProgress > 100) {
-      overflow = newProgress - 100;
-      newProgress = 100;
+    // Update gameStore's luckyBoostProgress to match (for backward compatibility)
+    const luckyBoostState = luckyBoostStore.getState();
+    // Convert milestone-based progress to 0-100 scale for gameStore
+    // This is a simple mapping: if progress is in first milestone (0-100), use it directly
+    // Otherwise, calculate percentage within current milestone
+    let newProgress = 0;
+    if (luckyBoostState.currentProgress <= 100) {
+      newProgress = luckyBoostState.currentProgress;
+    } else {
+      // For milestones beyond the first, map to 0-100 scale
+      // Find current milestone and calculate percentage
+      const milestoneIndex = luckyBoostState.currentMilestoneIndex;
+      if (milestoneIndex < MILESTONES.length) {
+        const current = MILESTONES[milestoneIndex];
+        const range = current.end - current.start;
+        const progressInMilestone = luckyBoostState.currentProgress - current.start;
+        newProgress = Math.min(100, (progressInMilestone / range) * 100);
+      } else {
+        newProgress = 100;
+      }
     }
     
-    // If we hit 100%, trigger reward popup
-    if (newProgress >= 100 && !this.state.showRewardPopup) {
+    this.state.luckyBoostProgress = newProgress;
+    
+    // If we hit milestones, trigger reward popup
+    if (milestonesReached.length > 0 && !this.state.showRewardPopup) {
       this.state.showRewardPopup = true;
-      // Store overflow for after reward (will be applied after claim)
-      this.state.luckyBoostProgress = 100;
-      // Store overflow in a temporary property
-      (this.state as any).overflow = overflow;
-    } else {
-      this.state.luckyBoostProgress = newProgress;
     }
 
     const result: PackOpenResult = {
@@ -135,6 +150,7 @@ class GameStore {
       packPrice: pack.price,
       isWin: card.value >= pack.price,
       timestamp: Date.now(),
+      theme: pack.theme,
     };
 
     this.state.lastResult = result;
@@ -144,8 +160,13 @@ class GameStore {
     return result;
   }
 
-  // Keep card (do nothing, just return to home)
+  // Keep card (add to inventory and return to home)
   keepCard(): void {
+    if (this.state.lastResult) {
+      // Add card to inventory
+      this.state.inventory = [...this.state.inventory, { ...this.state.lastResult.card }];
+    }
+    
     if (this.state.luckyBoostProgress >= 100) {
       this.state.currentScreen = 'reward';
     } else {
@@ -194,6 +215,17 @@ class GameStore {
     this.state.selectedPack = null;
     this.state.lastResult = null;
     
+    saveState(this.state);
+    this.notify();
+  }
+
+  // Claim reward credits only (e.g. after RewardModal in CardReveal). No navigation, keep lastResult.
+  claimRewardCreditsOnly(): void {
+    this.state.usdcBalance += 25;
+    const overflow = (this.state as any).overflow || 0;
+    this.state.luckyBoostProgress = overflow;
+    delete (this.state as any).overflow;
+    this.state.showRewardPopup = false;
     saveState(this.state);
     this.notify();
   }
