@@ -39,6 +39,10 @@
   animation: tooltipFadeIn 0.2s ease;
 }
 
+.tooltip-bottom .tooltip-content {
+  margin-top: 4px;
+}
+
 @keyframes tooltipFadeIn {
   from {
     transform: scale(0.95);

@@ -29,7 +29,9 @@
 .result-meter-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 12px;
+  gap: var(--spacing-md, 12px);
 }
 
 .result-meter-logo {
@@ -129,10 +131,10 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs, 6px);
-  margin-top: 12px;
   font-family: var(--font-family, 'Space Grotesk');
   font-size: 12px;
   letter-spacing: -0.24px;
+  margin-left: auto;
 }
 
 .result-meter-next-reward-label {

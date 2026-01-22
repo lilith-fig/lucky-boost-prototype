@@ -23,6 +23,7 @@ export function CardRevealScreen() {
   const [showKeepSell, setShowKeepSell] = useState(false);
   const [isSelling, setIsSelling] = useState(false);
   const [hasSold, setHasSold] = useState(false);
+  const [hasKept, setHasKept] = useState(false);
   const [tiltStyle, setTiltStyle] = useState<React.CSSProperties>({});
   const [tiltEnabled, setTiltEnabled] = useState(false);
   const cardRef = useRef<HTMLImageElement>(null);
@@ -116,19 +117,19 @@ export function CardRevealScreen() {
             setTimeout(() => {
               setShowRewardModal(true);
             }, 1200);
-          } else {
-            // Remain for 1s after animation ends, then dismiss (don't close right away)
-            if (dismissTimeoutRef.current) clearTimeout(dismissTimeoutRef.current);
-            dismissTimeoutRef.current = setTimeout(() => {
-              setShowMeter(false);
-              dismissTimeoutRef.current = null;
-            }, 1000);
           }
+          
+          // Always remain for 2s after animation ends, then dismiss
+          if (dismissTimeoutRef.current) clearTimeout(dismissTimeoutRef.current);
+          dismissTimeoutRef.current = setTimeout(() => {
+            setShowMeter(false);
+            dismissTimeoutRef.current = null;
+          }, 2000);
         }
       };
 
       requestAnimationFrame(animate);
-    }, 1400); // 800ms (price) + 600ms (meter delay) - runs in parallel with actions
+    }, 600); // Start meter animation sooner - runs in parallel with price/actions
 
     return () => {
       clearTimeout(priceDelay);
@@ -164,11 +165,11 @@ export function CardRevealScreen() {
 
   return (
     <div className="card-reveal-screen">
-      {hasSold && (
+      {(hasSold || hasKept) && (
         <div className="card-reveal-pack-selection">
           <Button
             variant="secondary"
-            size="small"
+            size="medium"
             onClick={() => gameStore.navigateTo('home')}
           >
             Pack selection
@@ -203,14 +204,15 @@ export function CardRevealScreen() {
 
         {showKeepSell && (
           <div className="card-reveal-actions">
-            {!hasSold ? (
+            {!hasSold && !hasKept ? (
               <>
                 <Button
                   variant="secondary"
                   size="large"
                   onClick={() => {
                     toastStore.showToast('Card added to your inventory');
-                    gameStore.keepCard();
+                    gameStore.keepCard({ stayOnReveal: true });
+                    setHasKept(true);
                   }}
                 >
                   Keep

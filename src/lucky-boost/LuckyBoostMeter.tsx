@@ -56,7 +56,7 @@ export const LuckyBoostMeter: React.FC<LuckyBoostMeterProps> = ({ onClick }) => 
       </div>
       {state.lastProgressAdded && (
         <p className="tooltip-last-update">
-          Last update: +{state.lastProgressAdded} from last pack
+          Last update: +{getProgressPercentage(state.lastProgressAdded).toFixed(1)}% from last pack
         </p>
       )}
     </div>

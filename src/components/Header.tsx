@@ -4,6 +4,7 @@ import { LuckyBoostHeaderMeter } from '../lucky-boost/LuckyBoostHeaderMeter';
 import { useLuckyBoost } from '../lucky-boost/useLuckyBoost';
 import { Logo } from './Logo';
 import { CurrencyIcon } from './CurrencyIcon';
+import { CreditIcon } from './CreditIcon';
 import { Button } from '../design-system/Button';
 import { CountUpNumber } from './CountUpNumber';
 import './Header.css';
@@ -98,14 +99,20 @@ export function Header() {
                 onMouseLeave={() => setShowBalanceDropdown(false)}
               >
                 <div className="dropdown-item">
-                  <div className="dropdown-label">USDC</div>
+                  <div className="dropdown-item-left">
+                    <CurrencyIcon size={14} className="dropdown-item-icon" />
+                    <div className="dropdown-label">USDC</div>
+                  </div>
                   <div className="dropdown-value">
                     <CountUpNumber value={usdcBalance} duration={800} />
                   </div>
                 </div>
                 <div className="dropdown-divider"></div>
                 <div className="dropdown-item">
-                  <div className="dropdown-label">Credits</div>
+                  <div className="dropdown-item-left">
+                    <CreditIcon size={14} className="dropdown-item-icon" />
+                    <div className="dropdown-label">Credits</div>
+                  </div>
                   <div className="dropdown-value">
                     <CountUpNumber value={creditsBalance} duration={800} />
                   </div>

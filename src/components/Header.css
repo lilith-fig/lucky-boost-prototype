@@ -39,7 +39,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 /* Balance Container */
@@ -47,19 +47,27 @@
   position: relative;
   color: rgba(255, 255, 255, 0);
   background: unset;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 8px;
+  margin-right: 8px;
 }
 
 /* Balance Display - USDC only in default state */
 .balance-display {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 6px 0px;
   background: unset;
   border: 0px none rgba(0, 0, 0, 0);
   border-image: none;
   border-radius: var(--radius-md);
-  height: 36px;
+  width: 103px;
+  height: 40px;
   cursor: pointer;
   transition: all 0.2s ease;
   color: rgba(255, 255, 255, 0);
@@ -80,10 +88,11 @@
 }
 
 .balance-amount {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: var(--font-weight-bold);
   color: var(--global-neutral-white);
   line-height: 1;
+  width: 100%;
 }
 
 .balance-currency {
@@ -131,7 +140,7 @@
 /* Balance Dropdown */
 .balance-dropdown {
   position: absolute;
-  top: calc(100% + 16px);
+  top: 64px;
   right: 0;
   min-width: 200px;
   background: var(--global-neutral-grey-80);
@@ -172,6 +181,16 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--spacing-sm) 0;
+}
+
+.dropdown-item-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.dropdown-item-icon {
+  flex-shrink: 0;
 }
 
 .dropdown-label {

@@ -49,13 +49,26 @@ export function ResultLuckyBoostMeter({ progress, previousProgress, progressAdde
   return (
     <div className={`result-lucky-boost-meter ${isFull ? 'meter-full' : ''}`}>
       <div className="result-meter-container">
-        {/* Lucky Boost Logo */}
+        {/* Lucky Boost Logo and Next Reward */}
         <div className="result-meter-header">
           <img 
             src="/lucky-boost-logo.png" 
             alt="Lucky Boost" 
             className="result-meter-logo"
           />
+          {nextReward && (
+            <div className="result-meter-next-reward">
+              <span className="result-meter-next-reward-label">Next reward</span>
+              <CreditIcon size={14} />
+              <span className="result-meter-next-reward-amount">
+                {nextReward.reward.credits != null
+                  ? `$${nextReward.reward.credits.toFixed(2)}`
+                  : nextReward.reward.guaranteedPull != null
+                    ? `≥$${nextReward.reward.guaranteedPull.minValue.toFixed(2)}`
+                    : ''}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Progress Bar Container */}
@@ -88,19 +101,6 @@ export function ResultLuckyBoostMeter({ progress, previousProgress, progressAdde
             )}
           </div>
         </div>
-        {nextReward && (
-          <div className="result-meter-next-reward">
-            <span className="result-meter-next-reward-label">Next reward</span>
-            <CreditIcon size={14} />
-            <span className="result-meter-next-reward-amount">
-              {nextReward.reward.credits != null
-                ? `$${nextReward.reward.credits.toFixed(2)}`
-                : nextReward.reward.guaranteedPull != null
-                  ? `≥$${nextReward.reward.guaranteedPull.minValue.toFixed(2)}`
-                  : ''}
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );

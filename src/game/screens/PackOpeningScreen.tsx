@@ -24,11 +24,6 @@ export function PackOpeningScreen() {
           </div>
         </div>
         <p className="opening-text">Opening Pack...</p>
-        <div className="loading-dots">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
       </div>
     </div>
   );

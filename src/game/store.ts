@@ -174,10 +174,17 @@ class GameStore {
   }
 
   // Keep card (add to inventory and return to home)
-  keepCard(): void {
+  keepCard(options?: { stayOnReveal?: boolean }): void {
     if (this.state.lastResult) {
       // Add card to inventory
       this.state.inventory = [...this.state.inventory, { ...this.state.lastResult.card }];
+    }
+
+    if (options?.stayOnReveal) {
+      // Stay on card reveal; do not navigate or clear lastResult (UI swaps to Flex / Pull another)
+      saveState(this.state);
+      this.notify();
+      return;
     }
     
     if (this.state.luckyBoostProgress >= 100) {
