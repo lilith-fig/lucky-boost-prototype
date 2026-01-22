@@ -1,6 +1,8 @@
 import { Pack } from './types';
 
 // Pack definitions with odds
+// Suggested win rate: ~30% (card value >= pack price)
+// Suggested odds ensure balanced gameplay with 30% win rate
 export const PACKS: Pack[] = [
   // Pokemon Packs
   {
@@ -10,6 +12,9 @@ export const PACKS: Pack[] = [
     price: 25,
     theme: 'pokemon',
     tier: 'starter',
+    // Suggested odds for ~30% win rate at $25:
+    // Loss (70%): common/rare mostly, some epic
+    // Win (30%): epic/legendary/mythic
     odds: [
       { rarity: 'common', probability: 0.60, minValue: 0.10, maxValue: 1.00 },
       { rarity: 'rare', probability: 0.25, minValue: 1.00, maxValue: 5.00 },
@@ -25,6 +30,9 @@ export const PACKS: Pack[] = [
     price: 50,
     theme: 'pokemon',
     tier: 'collector',
+    // Suggested odds for ~30% win rate at $50:
+    // Loss (70%): common/rare mostly, some epic
+    // Win (30%): epic/legendary/mythic
     odds: [
       { rarity: 'common', probability: 0.50, minValue: 0.50, maxValue: 2.00 },
       { rarity: 'rare', probability: 0.30, minValue: 2.00, maxValue: 10.00 },
@@ -40,6 +48,9 @@ export const PACKS: Pack[] = [
     price: 100,
     theme: 'pokemon',
     tier: 'elite',
+    // Suggested odds for ~30% win rate at $100:
+    // Loss (70%): common/rare mostly, some epic
+    // Win (30%): epic/legendary/mythic
     odds: [
       { rarity: 'common', probability: 0.40, minValue: 1.00, maxValue: 5.00 },
       { rarity: 'rare', probability: 0.30, minValue: 5.00, maxValue: 25.00 },
@@ -55,6 +66,9 @@ export const PACKS: Pack[] = [
     price: 250,
     theme: 'pokemon',
     tier: 'master',
+    // Suggested odds for ~30% win rate at $250:
+    // Loss (70%): epic mostly (values below $250)
+    // Win (30%): legendary/mythic (values >= $250)
     odds: [
       { rarity: 'epic', probability: 0.50, minValue: 25.00, maxValue: 100.00 },
       { rarity: 'legendary', probability: 0.35, minValue: 100.00, maxValue: 500.00 },
@@ -69,6 +83,7 @@ export const PACKS: Pack[] = [
     price: 25,
     theme: 'onepiece',
     tier: 'starter',
+    // Suggested odds for ~30% win rate at $25
     odds: [
       { rarity: 'common', probability: 0.60, minValue: 0.10, maxValue: 1.00 },
       { rarity: 'rare', probability: 0.25, minValue: 1.00, maxValue: 5.00 },
@@ -84,6 +99,7 @@ export const PACKS: Pack[] = [
     price: 50,
     theme: 'onepiece',
     tier: 'collector',
+    // Suggested odds for ~30% win rate at $50
     odds: [
       { rarity: 'common', probability: 0.50, minValue: 0.50, maxValue: 2.00 },
       { rarity: 'rare', probability: 0.30, minValue: 2.00, maxValue: 10.00 },
@@ -99,6 +115,7 @@ export const PACKS: Pack[] = [
     price: 100,
     theme: 'onepiece',
     tier: 'elite',
+    // Suggested odds for ~30% win rate at $100
     odds: [
       { rarity: 'common', probability: 0.40, minValue: 1.00, maxValue: 5.00 },
       { rarity: 'rare', probability: 0.30, minValue: 5.00, maxValue: 25.00 },
@@ -114,6 +131,7 @@ export const PACKS: Pack[] = [
     price: 250,
     theme: 'onepiece',
     tier: 'master',
+    // Suggested odds for ~30% win rate at $250
     odds: [
       { rarity: 'epic', probability: 0.50, minValue: 25.00, maxValue: 100.00 },
       { rarity: 'legendary', probability: 0.35, minValue: 100.00, maxValue: 500.00 },
@@ -156,26 +174,81 @@ function seededRandom(seed: number): () => number {
 }
 
 // Generate a random card based on pack odds
+// Ensures 30% win rate (card value >= pack price)
 export function generateCard(pack: Pack, seed?: number): import('./types').Card {
   const rng = seed !== undefined ? seededRandom(seed) : () => Math.random();
   
-  const rand = rng();
+  // First determine if this is a win (30% chance)
+  const winRoll = rng();
+  const isWin = winRoll < 0.30;
   
-  // Select rarity based on probabilities
-  let cumulative = 0;
-  let selectedOdds = pack.odds[0];
-  for (const odds of pack.odds) {
-    cumulative += odds.probability;
-    if (rand <= cumulative) {
-      selectedOdds = odds;
-      break;
+  let selectedOdds;
+  let value: number;
+  
+  if (isWin) {
+    // WIN: Generate a card with value >= pack price
+    // Filter odds that can produce wins (maxValue >= pack price)
+    const winningOdds = pack.odds.filter(odds => odds.maxValue >= pack.price);
+    
+    if (winningOdds.length === 0) {
+      // Fallback: use highest tier odds
+      selectedOdds = pack.odds[pack.odds.length - 1];
+    } else {
+      // Select from winning odds based on their probabilities
+      const rand = rng();
+      let cumulative = 0;
+      const totalWinProb = winningOdds.reduce((sum, odds) => sum + odds.probability, 0);
+      
+      for (const odds of winningOdds) {
+        cumulative += odds.probability / totalWinProb;
+        if (rand <= cumulative) {
+          selectedOdds = odds;
+          break;
+        }
+      }
+      if (!selectedOdds) {
+        selectedOdds = winningOdds[winningOdds.length - 1];
+      }
     }
+    
+    // Generate value >= pack price
+    const minValue = Math.max(selectedOdds.minValue, pack.price);
+    const valueRange = selectedOdds.maxValue - minValue;
+    const valueRand = rng();
+    value = minValue + valueRange * valueRand;
+  } else {
+    // LOSS: Generate a card with value < pack price
+    // Filter odds that can produce losses (minValue < pack price)
+    const losingOdds = pack.odds.filter(odds => odds.minValue < pack.price);
+    
+    if (losingOdds.length === 0) {
+      // Fallback: use lowest tier odds
+      selectedOdds = pack.odds[0];
+    } else {
+      // Select from losing odds based on their probabilities
+      const rand = rng();
+      let cumulative = 0;
+      const totalLossProb = losingOdds.reduce((sum, odds) => sum + odds.probability, 0);
+      
+      for (const odds of losingOdds) {
+        cumulative += odds.probability / totalLossProb;
+        if (rand <= cumulative) {
+          selectedOdds = odds;
+          break;
+        }
+      }
+      if (!selectedOdds) {
+        selectedOdds = losingOdds[0];
+      }
+    }
+    
+    // Generate value < pack price
+    const maxValue = Math.min(selectedOdds.maxValue, pack.price * 0.99); // 99% of pack price to ensure loss
+    const valueRange = maxValue - selectedOdds.minValue;
+    const valueRand = rng();
+    value = selectedOdds.minValue + valueRange * valueRand;
   }
-
-  // Generate value within range
-  const valueRange = selectedOdds.maxValue - selectedOdds.minValue;
-  const valueRand = rng();
-  const value = selectedOdds.minValue + valueRange * valueRand;
+  
   const roundedValue = Math.round(value * 100) / 100; // Round to 2 decimals
 
   // Select random name from pool

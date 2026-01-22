@@ -15,24 +15,36 @@
 }
 
 .pack-shake {
-  animation: shake 0.5s ease-in-out infinite;
+  animation: horizontal-shaking 2s ease-in-out;
 }
 
 .pack-icon-animated {
-  font-size: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 127px;
+  height: 163px;
   filter: drop-shadow(0 0 20px rgba(211, 240, 21, 0.5));
 }
 
-@keyframes shake {
-  0%, 100% {
-    transform: translateX(0) rotate(0deg);
-  }
-  25% {
-    transform: translateX(-10px) rotate(-5deg);
-  }
-  75% {
-    transform: translateX(10px) rotate(5deg);
-  }
+.pack-icon-animated .pack-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.pack-icon-animated .pack-fallback {
+  font-size: 120px;
+  display: block;
+}
+
+@keyframes horizontal-shaking {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(5px); }
+  50% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+  100% { transform: translateX(0); }
 }
 
 .opening-text {

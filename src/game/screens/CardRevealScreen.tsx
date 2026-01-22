@@ -5,10 +5,14 @@ import { RewardModal } from '../components/RewardModal';
 import { Button } from '../../design-system/Button';
 import { getRandomCardImageUrl } from '../utils/cardImages';
 import { formatCurrency } from '../../utils/formatCurrency';
+import { CountUpNumber } from '../../components/CountUpNumber';
+import { calculateProgress, getProgressPercentage } from '../../lucky-boost/types';
+import { luckyBoostStore } from '../../lucky-boost/store';
 import './CardRevealScreen.css';
 
 export function CardRevealScreen() {
   const state = gameStore.getState();
+  const [showPrice, setShowPrice] = useState(false);
   const [showMeter, setShowMeter] = useState(false);
   const [meterProgress, setMeterProgress] = useState(0);
   const [previousProgress, setPreviousProgress] = useState(0);
@@ -16,6 +20,7 @@ export function CardRevealScreen() {
   const [isMeterFull, setIsMeterFull] = useState(false);
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [showKeepSell, setShowKeepSell] = useState(false);
+  const [isSelling, setIsSelling] = useState(false);
   const result = state.lastResult;
 
   useEffect(() => {
@@ -25,26 +30,39 @@ export function CardRevealScreen() {
     }
 
     // Calculate progress added from this pack open
-    const calculatedProgressAdded = gameStore.calculateLuckyBoostProgress(
+    const calculatedProgressAdded = calculateProgress(
       result.packPrice,
       result.card.value
     );
     setProgressAdded(calculatedProgressAdded);
 
-    // Calculate previous progress (current progress minus what was just added)
-    const currentProgress = state.luckyBoostProgress;
-    const prevProgress = Math.max(0, currentProgress - calculatedProgressAdded);
-    setPreviousProgress(prevProgress);
+    // Get the actual current progress from lucky boost store (before pending update is applied)
+    const currentLuckyBoostState = luckyBoostStore.getState();
+    const previousProgressPercentage = getProgressPercentage(currentLuckyBoostState.currentProgress);
+    setPreviousProgress(previousProgressPercentage);
 
-    // Show meter after a brief delay
+    // The target progress is what's calculated in gameStore (for display)
+    const targetProgress = state.luckyBoostProgress;
+
+    // Stage 1: Show price after card is revealed (800ms delay)
+    const priceDelay = setTimeout(() => {
+      setShowPrice(true);
+    }, 800);
+
+    // Stage 2: Show actions smoothly right after price appears (parallel with meter)
+    const actionsDelay = setTimeout(() => {
+      setShowKeepSell(true);
+    }, 1200); // 800ms (price) + 400ms (smooth transition)
+
+    // Stage 3: Show meter in parallel (doesn't block actions)
     const meterDelay = setTimeout(() => {
       setShowMeter(true);
       
       // Animate meter fill with smooth stacking animation
-      const targetProgressValue = currentProgress;
+      const targetProgressValue = targetProgress;
       const duration = 1800; // 1.8s fill animation for smooth feel
       const startTime = Date.now();
-      const startProgressValue = prevProgress;
+      const startProgressValue = previousProgressPercentage;
 
       const animate = () => {
         const elapsed = Date.now() - startTime;
@@ -59,6 +77,10 @@ export function CardRevealScreen() {
         if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
+          // After meter animation completes, apply pending store updates
+          // This updates the header icon without spoiling the result
+          gameStore.applyPendingLuckyBoostUpdate();
+
           // Check if meter is full
           if (targetProgressValue >= 100) {
             setIsMeterFull(true);
@@ -67,25 +89,31 @@ export function CardRevealScreen() {
               setShowRewardModal(true);
             }, 1200);
           } else {
-            // Auto-dismiss meter after animation completes, then show Keep/Sell on this screen
+            // Auto-dismiss meter after animation completes (actions already shown)
             setTimeout(() => {
               setShowMeter(false);
-              setTimeout(() => setShowKeepSell(true), 400);
             }, 1000);
           }
         }
       };
 
       requestAnimationFrame(animate);
-    }, 500); // Delay before showing meter
+    }, 1400); // 800ms (price) + 600ms (meter delay) - runs in parallel with actions
 
-    return () => clearTimeout(meterDelay);
+    return () => {
+      clearTimeout(priceDelay);
+      clearTimeout(actionsDelay);
+      clearTimeout(meterDelay);
+    };
   }, [result, state.luckyBoostProgress]);
 
   const handleRewardClose = () => {
     setShowRewardModal(false);
     gameStore.claimRewardCreditsOnly();
-    setTimeout(() => setShowKeepSell(true), 300);
+    // Actions are already shown, no need to delay
+    if (!showKeepSell) {
+      setShowKeepSell(true);
+    }
   };
 
   if (!result) {
@@ -112,9 +140,11 @@ export function CardRevealScreen() {
               className="card-image"
             />
           ) : null}
-          <div className="card-price">
-            ${formatCurrency(card.value)}
-          </div>
+          {showPrice && (
+            <div className="card-price">
+              $<CountUpNumber value={card.value} duration={1000} />
+            </div>
+          )}
         </div>
 
         {showKeepSell && (
@@ -129,15 +159,23 @@ export function CardRevealScreen() {
             <Button
               variant="primary"
               size="large"
-              onClick={() => gameStore.sellCard()}
+              onClick={() => {
+                setIsSelling(true);
+                // Wait 2 seconds before navigating
+                setTimeout(() => {
+                  gameStore.sellCard();
+                }, 2000);
+              }}
+              className={isSelling ? 'btn-loading' : ''}
+              disabled={isSelling}
             >
-              Sell for ${formatCurrency(card.value)}
+              {isSelling ? 'Selling...' : `Sell for ${formatCurrency(card.value)}`}
             </Button>
           </div>
         )}
       </div>
 
-      {/* Lucky Boost Meter - appears in corner */}
+      {/* Lucky Boost Meter - appears in corner (runs in parallel, doesn't block actions) */}
       {showMeter && (
         <ResultLuckyBoostMeter
           progress={meterProgress}
@@ -147,7 +185,7 @@ export function CardRevealScreen() {
           onDismiss={() => {
             if (!isMeterFull) {
               setShowMeter(false);
-              setShowKeepSell(true);
+              // Actions are already shown independently, no need to trigger them
             }
           }}
         />

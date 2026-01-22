@@ -6,6 +6,7 @@ import { Logo } from './Logo';
 import { CurrencyIcon } from './CurrencyIcon';
 import { Button } from '../design-system/Button';
 import { formatCurrency } from '../utils/formatCurrency';
+import { CountUpNumber } from './CountUpNumber';
 import './Header.css';
 
 export function Header() {
@@ -52,7 +53,9 @@ export function Header() {
             >
               <div className="balance-display">
                 <CurrencyIcon size={16} />
-                <span className="balance-amount">{formatCurrency(usdcBalance)}</span>
+                <span className="balance-amount">
+                  <CountUpNumber value={usdcBalance} duration={800} />
+                </span>
               </div>
             </div>
 
@@ -97,12 +100,16 @@ export function Header() {
               >
                 <div className="dropdown-item">
                   <div className="dropdown-label">USDC</div>
-                  <div className="dropdown-value">{formatCurrency(usdcBalance)}</div>
+                  <div className="dropdown-value">
+                    <CountUpNumber value={usdcBalance} duration={800} />
+                  </div>
                 </div>
                 <div className="dropdown-divider"></div>
                 <div className="dropdown-item">
                   <div className="dropdown-label">Credits</div>
-                  <div className="dropdown-value">{formatCurrency(creditsBalance)}</div>
+                  <div className="dropdown-value">
+                    <CountUpNumber value={creditsBalance} duration={800} />
+                  </div>
                 </div>
                 <div className="dropdown-divider"></div>
                 <div className="dropdown-action">
@@ -111,11 +118,11 @@ export function Header() {
                     size="medium"
                     onClick={() => {
                       gameStore.topUp();
-                      setShowBalanceDropdown(false);
+                      // Don't close dropdown on click - only close on mouse leave
                     }}
                     className="dropdown-top-up-button"
                   >
-                    Top up 5K
+                    Top up 1K
                   </Button>
                 </div>
               </div>

@@ -32,7 +32,7 @@
   background: var(--global-neutral-grey-90);
   border: 1px solid var(--global-neutral-grey-70);
   border-radius: var(--radius-sm);
-  padding: var(--spacing-md);
+  padding: 16px;
   width: 373px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
   /* Scale animation only on content, not positioning */

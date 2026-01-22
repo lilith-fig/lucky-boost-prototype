@@ -1,12 +1,12 @@
 import { GameState, PackOpenResult } from './types';
 import { generateCard, PACKS } from './packs';
 import { luckyBoostStore } from '../lucky-boost/store';
-import { MILESTONES } from '../lucky-boost/types';
+import { MILESTONES, calculateProgress, MAX_PROGRESS } from '../lucky-boost/types';
 
 const STORAGE_KEY = 'gachaGameState';
 
 const defaultState: GameState = {
-  usdcBalance: 5000, // Starting USDC balance ($5,000.00)
+  usdcBalance: 500, // Starting USDC balance ($500.00) - resets each session
   credits: 0, // Starting credits (separate from USDC)
   packsOpened: 0,
   luckyBoostProgress: 0,
@@ -27,7 +27,9 @@ function loadState(): GameState {
         parsed.usdcBalance = parsed.credits; // Migrate old credits to USDC
         parsed.credits = 0; // Reset credits to 0
       }
-      return { ...defaultState, ...parsed, currentScreen: 'home' }; // Always start at home
+      // Reset balance to default on each session (don't persist balance between sessions)
+      const loadedState = { ...defaultState, ...parsed, currentScreen: 'home', usdcBalance: defaultState.usdcBalance };
+      return loadedState;
     }
   } catch (e) {
     console.error('Failed to load game state:', e);
@@ -37,8 +39,9 @@ function loadState(): GameState {
 
 function saveState(state: GameState): void {
   try {
-    // Don't save currentScreen to localStorage
-    const { currentScreen, ...stateToSave } = state;
+    // Don't save currentScreen or usdcBalance to localStorage
+    // Balance resets each session, so we don't persist it
+    const { currentScreen, usdcBalance, ...stateToSave } = state;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
   } catch (e) {
     console.error('Failed to save game state:', e);
@@ -48,6 +51,19 @@ function saveState(state: GameState): void {
 class GameStore {
   private state: GameState = loadState();
   private listeners: Set<() => void> = new Set();
+
+  constructor() {
+    // Reset balance to default on session start
+    this.state.usdcBalance = defaultState.usdcBalance;
+    
+    // Reset balance when user leaves the session (beforeunload)
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beforeunload', () => {
+        // Balance will reset on next session start since it's not persisted
+        this.state.usdcBalance = defaultState.usdcBalance;
+      });
+    }
+  }
 
   getState(): GameState {
     return { ...this.state };
@@ -75,20 +91,18 @@ class GameStore {
     this.notify();
   }
 
-  // Lucky Boost calculation (as per requirements)
+  // Lucky Boost calculation (for display purposes)
+  // Uses the same formula as calculateProgress in lucky-boost/types.ts
   calculateLuckyBoostProgress(packPrice: number, cardValue: number): number {
-    // Only losses can build up lucky boost progress
     const isWin = cardValue >= packPrice;
     
+    // Wins give no progress
     if (isWin) {
-      return 0; // Wins don't contribute to progress
+      return 0;
     }
     
-    // Loss bonus calculation
-    const lossRatio = (packPrice - cardValue) / packPrice;
-    const lossBonus = Math.min(12, Math.round(lossRatio * 12));
-    
-    return lossBonus;
+    // Only losses add progress: 10% of pack price
+    return packPrice * 0.1;
   }
 
   // Open a pack
@@ -110,40 +124,39 @@ class GameStore {
     this.state.usdcBalance -= pack.price;
     this.state.packsOpened += 1;
 
-    // Update Lucky Boost progress in the lucky boost store
-    const { milestonesReached } = luckyBoostStore.addPackOpen(
-      pack.price,
-      card.value
-    );
+    // Calculate what the progress update would be, but don't apply it yet
+    // Store it as pending to avoid spoiling the result in the header
+    const progressAdded = calculateProgress(pack.price, card.value);
     
-    // Update gameStore's luckyBoostProgress to match (for backward compatibility)
-    const luckyBoostState = luckyBoostStore.getState();
-    // Convert milestone-based progress to 0-100 scale for gameStore
-    // This is a simple mapping: if progress is in first milestone (0-100), use it directly
-    // Otherwise, calculate percentage within current milestone
-    let newProgress = 0;
-    if (luckyBoostState.currentProgress <= 100) {
-      newProgress = luckyBoostState.currentProgress;
-    } else {
-      // For milestones beyond the first, map to 0-100 scale
-      // Find current milestone and calculate percentage
-      const milestoneIndex = luckyBoostState.currentMilestoneIndex;
-      if (milestoneIndex < MILESTONES.length) {
-        const current = MILESTONES[milestoneIndex];
-        const range = current.end - current.start;
-        const progressInMilestone = luckyBoostState.currentProgress - current.start;
-        newProgress = Math.min(100, (progressInMilestone / range) * 100);
-      } else {
-        newProgress = 100;
+    // Calculate what milestones would be reached (without actually updating stores)
+    const currentState = luckyBoostStore.getState();
+    const currentMilestone = MILESTONES[currentState.currentMilestoneIndex];
+    let milestonesReached: number[] = [];
+    
+    if (currentMilestone && progressAdded > 0) {
+      const newProgress = currentState.currentProgress + progressAdded;
+      
+      // Check if we've reached the milestone (100% = $500)
+      if (newProgress >= currentMilestone.end) {
+        milestonesReached.push(currentMilestone.id);
       }
     }
     
-    this.state.luckyBoostProgress = newProgress;
+    // Store pending update (will be applied after card reveal sequence)
+    this.state.pendingLuckyBoostUpdate = {
+      packPrice: pack.price,
+      cardValue: card.value,
+      milestonesReached,
+    };
     
-    // If we hit milestones, trigger reward popup
-    if (milestonesReached.length > 0 && !this.state.showRewardPopup) {
-      this.state.showRewardPopup = true;
-    }
+    // Calculate what the new progress would be for display purposes (but don't update stores)
+    // Progress is tracked in dollars, 100% = $500
+    const luckyBoostState = luckyBoostStore.getState();
+    const newProgressDollars = luckyBoostState.currentProgress + progressAdded;
+    const newProgress = Math.min(100, Math.max(0, (newProgressDollars / MAX_PROGRESS) * 100));
+    
+    // Update local progress for calculation purposes (stores will be updated later)
+    this.state.luckyBoostProgress = newProgress;
 
     const result: PackOpenResult = {
       card,
@@ -187,8 +200,13 @@ class GameStore {
     if (this.state.luckyBoostProgress >= 100) {
       this.state.currentScreen = 'reward';
     } else {
-      this.state.currentScreen = 'home';
-      this.state.selectedPack = null;
+      // Navigate to pack detail page (preserve selectedPack)
+      if (this.state.selectedPack) {
+        this.state.currentScreen = 'packDetail';
+      } else {
+        // Fallback to home if no pack selected
+        this.state.currentScreen = 'home';
+      }
       this.state.lastResult = null;
     }
     saveState(this.state);
@@ -196,19 +214,15 @@ class GameStore {
   }
 
   // Claim reward (when Lucky Boost hits 100%)
-  claimReward(rewardType: 'credits' | 'guaranteedPull'): void {
-    if (rewardType === 'credits') {
-      this.state.usdcBalance += 25;
-    } else {
-      // Guaranteed pull - for now just add a note, could implement later
-      // For prototype, we'll just give USDC equivalent
-      this.state.usdcBalance += 25;
-    }
+  // Note: Credits are already added when milestones are reached in openPack(), so this just resets progress.
+  claimReward(_rewardType: 'credits' | 'guaranteedPull'): void {
+    // Credits were already added when milestones were reached in openPack()
+    // Progress reset is handled in luckyBoostStore.claimMilestone()
     
-    // Apply overflow from previous 100% completion
-    const overflow = (this.state as any).overflow || 0;
-    this.state.luckyBoostProgress = overflow;
-    delete (this.state as any).overflow;
+    // Update gameStore's luckyBoostProgress to match the reset progress
+    const luckyBoostState = luckyBoostStore.getState();
+    const newProgress = Math.min(100, Math.max(0, (luckyBoostState.currentProgress / MAX_PROGRESS) * 100));
+    this.state.luckyBoostProgress = newProgress;
     
     this.state.showRewardPopup = false;
     this.state.currentScreen = 'home';
@@ -220,12 +234,66 @@ class GameStore {
   }
 
   // Claim reward credits only (e.g. after RewardModal in CardReveal). No navigation, keep lastResult.
+  // Note: Credits are already added when milestones are reached in openPack(), so this just resets progress.
   claimRewardCreditsOnly(): void {
-    this.state.usdcBalance += 25;
-    const overflow = (this.state as any).overflow || 0;
-    this.state.luckyBoostProgress = overflow;
-    delete (this.state as any).overflow;
+    // Credits were already added when milestones were reached in openPack()
+    // Progress reset is handled in luckyBoostStore.claimMilestone()
+    
+    // Update gameStore's luckyBoostProgress to match the reset progress
+    const luckyBoostState = luckyBoostStore.getState();
+    const newProgress = Math.min(100, Math.max(0, (luckyBoostState.currentProgress / MAX_PROGRESS) * 100));
+    this.state.luckyBoostProgress = newProgress;
+    
     this.state.showRewardPopup = false;
+    saveState(this.state);
+    this.notify();
+  }
+
+  // Apply pending Lucky Boost update (called after card reveal sequence to avoid spoiling result)
+  applyPendingLuckyBoostUpdate(): void {
+    if (!this.state.pendingLuckyBoostUpdate) {
+      return;
+    }
+
+    const { packPrice, cardValue, milestonesReached } = this.state.pendingLuckyBoostUpdate;
+
+    // Now actually update the lucky boost store
+    luckyBoostStore.addPackOpen(packPrice, cardValue);
+    
+    // Automatically claim milestones and add credits to gameStore
+    let totalCreditsAwarded = 0;
+    for (const milestoneId of milestonesReached) {
+      const milestone = MILESTONES.find((m) => m.id === milestoneId);
+      if (milestone && milestone.reward.credits) {
+        // Claim milestone in lucky boost store
+        luckyBoostStore.claimMilestone(milestoneId);
+        // Add credits to gameStore
+        totalCreditsAwarded += milestone.reward.credits;
+      } else if (milestone && milestone.reward.guaranteedPull) {
+        // Claim milestone for guaranteed pulls (no credits)
+        luckyBoostStore.claimMilestone(milestoneId);
+      }
+    }
+    
+    // Add total credits awarded to gameStore credits balance
+    if (totalCreditsAwarded > 0) {
+      this.state.credits += totalCreditsAwarded;
+    }
+    
+    // Update gameStore's luckyBoostProgress to match (for backward compatibility)
+    // Progress is tracked in dollars, 100% = $500
+    const luckyBoostState = luckyBoostStore.getState();
+    const newProgress = Math.min(100, Math.max(0, (luckyBoostState.currentProgress / MAX_PROGRESS) * 100));
+    
+    this.state.luckyBoostProgress = newProgress;
+    
+    // If we hit milestones, trigger reward popup
+    if (milestonesReached.length > 0 && !this.state.showRewardPopup) {
+      this.state.showRewardPopup = true;
+    }
+
+    // Clear pending update
+    delete this.state.pendingLuckyBoostUpdate;
     saveState(this.state);
     this.notify();
   }
@@ -237,9 +305,9 @@ class GameStore {
     this.notify();
   }
 
-  // Top up USDC balance - add $5,000 to current balance
+  // Top up USDC balance - add $1,000 to current balance
   topUp(): void {
-    this.state.usdcBalance += 5000;
+    this.state.usdcBalance += 1000;
     saveState(this.state);
     this.notify();
   }

@@ -26,33 +26,45 @@ export interface LuckyBoostState {
   guaranteedPulls: number;
   history: PackOpenResult[];
   lastProgressAdded?: number;
+  overflow?: number; // Progress overflow beyond milestone end (to be added after reset)
 }
 
+// Milestones are now based on dollar amounts
+// 100% = $500 total losses
 export const MILESTONES: Milestone[] = [
-  { id: 1, start: 0, end: 100, reward: { credits: 5 } },
-  { id: 2, start: 100, end: 220, reward: { credits: 10 } },
-  { id: 3, start: 220, end: 360, reward: { guaranteedPull: { minValue: 15 } } },
-  { id: 4, start: 360, end: 540, reward: { credits: 25 } },
-  { id: 5, start: 540, end: 800, reward: { guaranteedPull: { minValue: 25 } } },
+  { id: 1, start: 0, end: 500, reward: { credits: 5 } },
 ];
 
+// Maximum progress for 100% meter
+export const MAX_PROGRESS = 500;
+
+/**
+ * Calculate Lucky Boost progress based on pack price.
+ * - Only losses can add progress
+ * - Progress = 10% of pack price spent
+ * - 100% meter = $500 total losses
+ * 
+ * Examples:
+ * - $25 pack loss: $2.50 progress
+ * - $50 pack loss: $5.00 progress
+ * - $100 pack loss: $10.00 progress
+ * - $250 pack loss: $25.00 progress
+ */
 export function calculateProgress(
   packPrice: number,
   cardValue: number
 ): number {
-  const base = 6;
   const isWin = cardValue >= packPrice;
   
+  // Wins give no progress
   if (isWin) {
-    return base;
+    return 0;
   }
   
-  const lossExtra = Math.min(
-    Math.floor(((packPrice - cardValue) / packPrice) * 40),
-    40
-  );
+  // Only losses add progress: 10% of pack price
+  const progress = packPrice * 0.1;
   
-  return base + lossExtra;
+  return progress;
 }
 
 export function getCurrentMilestone(progress: number): Milestone | null {
@@ -68,9 +80,7 @@ export function getProgressInCurrentMilestone(progress: number): number {
 }
 
 export function getProgressPercentage(progress: number): number {
-  const milestone = getCurrentMilestone(progress);
-  if (!milestone) return 0;
-  const range = milestone.end - milestone.start;
-  const current = progress - milestone.start;
-  return (current / range) * 100;
+  // Calculate percentage based on $500 max (100% = $500)
+  const percentage = (progress / MAX_PROGRESS) * 100;
+  return Math.min(100, Math.max(0, percentage));
 }

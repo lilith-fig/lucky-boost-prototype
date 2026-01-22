@@ -14,24 +14,6 @@
   gap: 32px;
 }
 
-.card-back {
-  width: 300px;
-  height: 448px;
-  position: relative;
-  cursor: pointer;
-  transform-style: preserve-3d;
-  transition: transform 0.6s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 16px;
-}
-
-.card-back.flipping {
-  transform: rotateY(180deg);
-}
-
 .card-back-image {
   width: 269px;
   height: 448px;
@@ -39,11 +21,7 @@
   border-radius: var(--radius-lg);
   cursor: pointer;
   transform-style: preserve-3d;
-  transition: transform 0.6s ease;
-}
-
-.card-back-image.flipping {
-  transform: rotateY(180deg);
+  transition: transform 0.1s ease-out;
 }
 
 .card-back-hint {

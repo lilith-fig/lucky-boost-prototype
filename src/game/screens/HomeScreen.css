@@ -93,7 +93,7 @@
 
 .pack-image {
   width: 110px;
-  height: 178px;
+  height: 175px;
   box-sizing: border-box;
   object-fit: contain;
   display: block;
@@ -103,7 +103,7 @@
 
 .pack-image-reflection {
   width: 110px;
-  height: 178px;
+  height: 173px;
   box-sizing: border-box;
   object-fit: contain;
   display: block;
@@ -169,7 +169,7 @@
   border-radius: 8px;
   background: rgba(236, 255, 111, 0.10);
   display: inline-flex;
-  padding: 6px 8px;
+  padding: 4px 8px;
   justify-content: center;
   align-items: center;
   gap: 2px;

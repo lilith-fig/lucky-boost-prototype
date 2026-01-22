@@ -65,7 +65,7 @@ export const LuckyBoostHeaderMeter: React.FC<LuckyBoostHeaderMeterProps> = ({ pr
   return (
     <Tooltip content={tooltipContent} position="bottom" persistOnClick={true}>
       <div className="lucky-boost-header-meter">
-        <LuckyBoostIcon percentage={progress} size={40} />
+        <LuckyBoostIcon percentage={percentage} size={40} />
       </div>
     </Tooltip>
   );

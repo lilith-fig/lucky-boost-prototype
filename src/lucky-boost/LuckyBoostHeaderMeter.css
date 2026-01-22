@@ -126,4 +126,5 @@
   font-size: 12px;
   color: var(--global-neutral-grey-30);
   letter-spacing: -0.24px;
+  text-align: right;
 }

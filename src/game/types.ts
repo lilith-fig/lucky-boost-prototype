@@ -40,6 +40,11 @@ export interface GameState {
   lastResult: PackOpenResult | null;
   showRewardPopup: boolean;
   inventory: Card[]; // Collection of kept cards
+  pendingLuckyBoostUpdate?: {
+    packPrice: number;
+    cardValue: number;
+    milestonesReached: number[];
+  };
 }
 
 export type Screen = GameState['currentScreen'];

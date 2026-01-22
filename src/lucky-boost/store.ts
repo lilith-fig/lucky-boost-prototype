@@ -1,4 +1,4 @@
-import { LuckyBoostState, PackOpenResult, calculateProgress, MILESTONES } from './types';
+import { LuckyBoostState, PackOpenResult, calculateProgress, MILESTONES, MAX_PROGRESS } from './types';
 
 const STORAGE_KEY = 'luckyBoostState';
 
@@ -19,6 +19,23 @@ function loadState(): LuckyBoostState {
       if (parsed.history && parsed.history.length > 10) {
         parsed.history = parsed.history.slice(-10);
       }
+      
+      // Migration: Normalize progress to be within bounds (0 to MAX_PROGRESS)
+      if (parsed.currentProgress !== undefined) {
+        // Cap progress at MAX_PROGRESS ($500)
+        if (parsed.currentProgress > MAX_PROGRESS) {
+          parsed.currentProgress = MAX_PROGRESS;
+        } else if (parsed.currentProgress < 0) {
+          parsed.currentProgress = 0;
+        }
+        
+        // Reset milestone index if past all milestones
+        if (parsed.currentMilestoneIndex !== undefined) {
+          const milestoneIndex = Math.min(parsed.currentMilestoneIndex, MILESTONES.length - 1);
+          parsed.currentMilestoneIndex = milestoneIndex;
+        }
+      }
+      
       return parsed;
     }
   } catch (e) {
@@ -59,39 +76,47 @@ class LuckyBoostStore {
     milestonesReached: number[];
   } {
     const progressAdded = calculateProgress(packPrice, cardValue);
-    const newProgress = this.state.currentProgress + progressAdded;
     
-    // Check for milestones reached
-    const milestonesReached: number[] = [];
-    let currentMilestoneIndex = this.state.currentMilestoneIndex;
-    
-    // Check if we've crossed any milestones
-    while (
-      currentMilestoneIndex < MILESTONES.length &&
-      newProgress >= MILESTONES[currentMilestoneIndex].end
-    ) {
-      milestonesReached.push(MILESTONES[currentMilestoneIndex].id);
-      currentMilestoneIndex++;
+    // If no progress added (win), return early
+    if (progressAdded === 0) {
+      return { progressAdded: 0, milestonesReached: [] };
     }
     
-    // Handle overflow - carry to next milestone
+    // Get current milestone
+    const currentMilestone = MILESTONES[this.state.currentMilestoneIndex];
+    if (!currentMilestone) {
+      // Past all milestones, don't add more progress
+      return { progressAdded: 0, milestonesReached: [] };
+    }
+    
+    // Check if we're already at or past the milestone end
+    const isAlreadyAtMilestone = this.state.currentProgress >= currentMilestone.end;
+    
+    // Add progress (in dollars)
+    const newProgress = this.state.currentProgress + progressAdded;
+    
+    // Check if we've reached the milestone (100% = $500)
+    const milestonesReached: number[] = [];
     let finalProgress = newProgress;
-    if (currentMilestoneIndex < MILESTONES.length) {
-      const currentMilestone = MILESTONES[currentMilestoneIndex];
-      if (finalProgress >= currentMilestone.end) {
-        // Overflow to next milestone
-        const overflow = finalProgress - currentMilestone.end;
-        if (currentMilestoneIndex + 1 < MILESTONES.length) {
-          finalProgress = MILESTONES[currentMilestoneIndex + 1].start + overflow;
-          currentMilestoneIndex++;
-        } else {
-          // Last milestone, cap at end
-          finalProgress = currentMilestone.end;
-        }
+    let finalMilestoneIndex = this.state.currentMilestoneIndex;
+    
+    // Check if we've crossed the current milestone end (or are already past it)
+    if (newProgress >= currentMilestone.end) {
+      // If this is the first time reaching the milestone, mark it as reached
+      if (!isAlreadyAtMilestone) {
+        milestonesReached.push(currentMilestone.id);
       }
-    } else {
-      // Past all milestones, cap at last milestone end
-      finalProgress = MILESTONES[MILESTONES.length - 1].end;
+      
+      // Calculate overflow (progress beyond milestone end)
+      const overflow = newProgress - currentMilestone.end;
+      
+      // Store overflow to be added after reset when reward is claimed
+      // For now, cap progress at milestone end
+      finalProgress = currentMilestone.end;
+      
+      // Store overflow in state (will be applied when milestone is claimed)
+      // Accumulate overflow if already past milestone, or set it if just reached
+      this.state.overflow = (this.state.overflow || 0) + overflow;
     }
 
     const result: PackOpenResult = {
@@ -106,7 +131,7 @@ class LuckyBoostStore {
     this.state = {
       ...this.state,
       currentProgress: finalProgress,
-      currentMilestoneIndex,
+      currentMilestoneIndex: finalMilestoneIndex,
       history: [...this.state.history.slice(-9), result],
       lastProgressAdded: progressAdded,
     };
@@ -121,11 +146,17 @@ class LuckyBoostStore {
     const milestone = MILESTONES.find((m) => m.id === milestoneId);
     if (!milestone) return;
 
+    // Reset progress to 0 and add any overflow
+    const overflow = this.state.overflow || 0;
+    
     this.state = {
       ...this.state,
+      currentProgress: overflow, // Reset to 0 + overflow
+      currentMilestoneIndex: 0, // Reset to first milestone
       credits: this.state.credits + (milestone.reward.credits || 0),
       guaranteedPulls:
         this.state.guaranteedPulls + (milestone.reward.guaranteedPull ? 1 : 0),
+      overflow: undefined, // Clear overflow after applying
     };
 
     saveState(this.state);

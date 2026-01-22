@@ -1,10 +1,10 @@
 .btn {
   font-family: var(--font-family);
   font-weight: var(--font-weight-bold);
-  border: none;
+  border: 3px solid transparent;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, background-image 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -41,21 +41,45 @@
 
 /* Primary Variant - Neon Green/Yellow with glossy effect */
 .btn-primary {
-  background: var(--gradient-primary);
-  border: 2px solid var(--global-brand-primary-20);
+  background-color: #D3F015;
+  border: 3px solid var(--global-brand-primary-20);
   color: var(--global-neutral-black);
   box-shadow: var(--shadow-inset);
+  position: relative;
+  isolation: isolate;
 }
 
-.btn-primary:hover:not(:disabled) {
-  background: linear-gradient(168.688deg, rgb(248, 255, 150) 33.847%, rgb(236, 255, 111) 24.074%, rgb(255, 255, 230) 55.405%, rgb(236, 255, 111) 75.907%, rgb(248, 255, 150) 118.46%);
-  box-shadow: var(--shadow-inset), 0px 2px 8px rgba(211, 240, 21, 0.5), 0px 0px 12px rgba(211, 240, 21, 0.3);
-  border-color: var(--global-brand-primary-10);
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-primary);
+  opacity: 1;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: -1;
 }
 
-.btn-primary:disabled {
+.btn-primary:hover:not(:disabled)::before,
+.btn-primary.btn-loading::before {
+  opacity: 0;
+}
+
+.btn-primary:hover:not(:disabled),
+.btn-primary.btn-loading {
+  border-color: var(--global-brand-primary-20);
+  background-color: #D3F015;
+  color: var(--global-neutral-black);
+  box-shadow: 5px 5px 0 0 rgba(255, 255, 255, 0.70) inset;
+}
+
+.btn-primary:disabled:not(.btn-loading) {
   background: var(--global-neutral-grey-60);
-  border: 2px solid var(--global-neutral-grey-60);
+  border: 3px solid var(--global-neutral-grey-60);
   color: var(--global-neutral-grey-30);
   box-shadow: none;
 }
@@ -68,8 +92,10 @@
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--global-neutral-grey-80);
-  border-color: var(--global-neutral-grey-60);
+  border-radius: 8px;
+  border: 1px solid var(--global-neutral-grey-70, #222);
+  background: var(--global-neutral-grey-90, #101010);
+  color: var(--global-neutral-white);
 }
 
 .btn-secondary:disabled {
@@ -80,12 +106,15 @@
 /* Tertiary Variant - Lighter Dark Grey */
 .btn-tertiary {
   background: var(--global-neutral-grey-70);
-  border: none;
+  border: 3px solid transparent;
   color: var(--global-neutral-white);
 }
 
 .btn-tertiary:hover:not(:disabled) {
-  background: var(--global-neutral-grey-60);
+  border-color: #D3F015;
+  background: #D3F015;
+  color: var(--global-neutral-black);
+  box-shadow: 5px 5px 0 0 rgba(255, 255, 255, 0.70) inset;
 }
 
 .btn-tertiary:disabled {
@@ -96,23 +125,22 @@
 /* Destructive Variant - Red with glossy effect */
 .btn-destructive {
   background: linear-gradient(180deg, #ff3333 0%, #cc0000 100%);
-  border: 2px solid rgba(0, 0, 0, 0.2);
+  border: 3px solid rgba(0, 0, 0, 0.2);
   color: var(--global-neutral-white);
   box-shadow: inset 0px 1px 0px 0px rgba(255, 255, 255, 0.2), 
               inset 0px -1px 0px 0px rgba(0, 0, 0, 0.3);
 }
 
 .btn-destructive:hover:not(:disabled) {
-  background: linear-gradient(180deg, #ff4444 0%, #dd0000 100%);
-  box-shadow: inset 0px 1px 0px 0px rgba(255, 255, 255, 0.3), 
-              inset 0px -1px 0px 0px rgba(0, 0, 0, 0.4),
-              0px 2px 8px rgba(255, 0, 0, 0.4);
-  filter: brightness(1.1);
+  border-color: #D3F015;
+  background: #D3F015;
+  color: var(--global-neutral-black);
+  box-shadow: 5px 5px 0 0 rgba(255, 255, 255, 0.70) inset;
 }
 
 .btn-destructive:disabled {
   background: #660000;
-  border: 2px solid #660000;
+  border: 3px solid #660000;
   color: var(--global-neutral-grey-30);
   box-shadow: none;
 }
