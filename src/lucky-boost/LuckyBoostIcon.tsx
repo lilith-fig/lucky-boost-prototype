@@ -104,9 +104,9 @@ export const LuckyBoostIcon: React.FC<LuckyBoostIconProps> = ({
               flexWrap: 'wrap',
               transform: 'translate(-50%, -50%)',
               width: '14px',
-              height: '30px',
+              height: '13px',
               flexDirection: 'row',
-              top: '50%',
+              top: '14px',
               left: '20px',
               marginLeft: 0,
               marginRight: 0,
@@ -137,7 +137,7 @@ export const LuckyBoostIcon: React.FC<LuckyBoostIconProps> = ({
             className="icon-percentage"
             style={{
               position: 'absolute',
-              top: '29px',
+              top: '26px',
               left: '20px',
               transform: 'translate(-50%, -50%)'
             }}
