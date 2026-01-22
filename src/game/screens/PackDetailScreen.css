@@ -24,7 +24,7 @@
   gap: var(--spacing-2xl);
   align-items: start;
   max-width: 100%;
-  height: 624px;
+  height: 493px;
 }
 
 /* Preview Section */
@@ -33,26 +33,54 @@
 }
 
 .pack-preview-bg {
-  width: 637px;
-  height: 560px;
-  aspect-ratio: 43 / 61;
-  background: radial-gradient(57.69% 31.65% at 50% 100%, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.00) 100%), var(--global-neutral-grey-90);
-  border-radius: var(--radius-md);
+  width: 100%;
+  height: 443px;
+  background: linear-gradient(180deg, #111 77.76%, #1C1C1C 86.7%, #131313 106.24%), linear-gradient(180deg, rgba(255, 255, 255, 0.00) 65.05%, rgba(255, 255, 255, 0.05) 100%), var(--global-neutral-black, #000);
+  border-radius: 8px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: var(--spacing-xl);
+  justify-content: flex-end;
+  padding-top: 0px;
+  padding-bottom: 0px;
   position: relative;
   overflow: hidden;
   border: 1px solid var(--global-neutral-grey-60);
 }
 
+.pack-preview-image-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  width: fit-content;
+  height: 365px;
+  overflow: hidden;
+}
+
 .pack-preview-image {
-  width: 100%;
-  max-width: 100%;
-  height: 416px;
+  width: 200px;
+  height: fit-content;
   object-fit: contain;
   display: block;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+  position: relative;
+  z-index: 1;
+}
+
+.pack-preview-image-reflection {
+  width: 200px;
+  height: fit-content;
+  object-fit: contain;
+  display: block;
+  transform: scaleY(-1);
+  opacity: 0.2;
+  position: relative;
+  margin-top: 0;
+  z-index: 0;
+  pointer-events: none;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
 }
 
@@ -73,8 +101,15 @@
 .pack-info-section {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xl);
-  width: 100%;
+  gap: var(--spacing-lg);
+  width: 532px;
+  height: 100%;
+  padding-top: 48px;
+  padding-bottom: 16px;
+  padding-left: 24px;
+  padding-right: 24px;
+  justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .pack-detail-name {
@@ -87,22 +122,19 @@
   align-items: center;
 }
 
-.pack-price-section {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
-.pack-price-large {
-  font-size: 32px;
-  font-weight: var(--font-weight-bold);
-  color: var(--global-brand-primary-20);
-  line-height: 1.2;
+.pack-description {
+  color: var(--global-neutral-white, #FFF);
+  font-family: "Space Grotesk";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin: 0;
 }
 
 .pack-open-button {
   width: 100%;
-  margin-top: var(--spacing-md);
+  margin-top: var(--spacing-sm);
 }
 
 .insufficient-credits {
@@ -111,6 +143,107 @@
   margin: 0;
   margin-top: calc(-1 * var(--spacing-sm));
   line-height: 1.4;
+}
+
+.pack-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--global-neutral-grey-70);
+  margin: var(--spacing-md) 0;
+}
+
+/* Pack Info Details */
+.pack-info-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.pack-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) 0;
+}
+
+.pack-info-label {
+  font-size: 14px;
+  color: var(--global-neutral-grey-30);
+}
+
+.pack-info-value {
+  font-size: 14px;
+  font-weight: var(--font-weight-bold);
+  color: var(--global-neutral-white);
+}
+
+/* Odds Section */
+.pack-odds-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+
+.pack-odds-header-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.pack-odds-title {
+  font-size: 14px;
+  font-weight: var(--font-weight-bold);
+  color: var(--global-neutral-white);
+}
+
+.pack-odds-toggle {
+  flex-shrink: 0;
+}
+
+.pack-odds-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--global-neutral-grey-90);
+  border: 1px solid var(--global-neutral-grey-70);
+  border-radius: var(--radius-md);
+}
+
+.pack-odds-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--global-neutral-grey-80);
+}
+
+.pack-odds-item:last-child {
+  border-bottom: none;
+}
+
+.pack-odds-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pack-odds-rarity {
+  font-size: 14px;
+  font-weight: var(--font-weight-bold);
+  color: var(--global-neutral-white);
+}
+
+.pack-odds-probability {
+  font-size: 14px;
+  color: var(--global-neutral-grey-30);
+}
+
+.pack-odds-range {
+  font-size: 12px;
+  color: var(--global-neutral-grey-40);
 }
 
 /* Responsive */

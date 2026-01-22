@@ -12,76 +12,55 @@
   align-items: center;
 }
 
-.reward-icon {
-  font-size: 64px;
-  animation: bounce 1s ease-in-out infinite;
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+.reward-logo {
+  width: auto;
+  height: auto;
+  max-width: 200px;
+  max-height: 100px;
+  object-fit: contain;
 }
 
 .reward-header h2 {
-  font-size: 28px;
-  font-weight: var(--font-weight-bold);
-  color: var(--global-neutral-white);
+  color: var(--global-neutral-white, #FFF);
+  font-family: "Space Grotesk";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
   margin: 0;
 }
 
-.reward-header p {
-  font-size: 16px;
-  color: var(--global-neutral-grey-30);
-  margin: 0;
-}
-
-.reward-options {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.reward-option {
-  background-color: var(--global-neutral-grey-80);
-  border: 2px solid var(--global-neutral-grey-70);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-lg);
-  cursor: pointer;
+.reward-earned {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  text-align: left;
-  transition: all 0.2s ease;
+  gap: var(--spacing-xs);
+  justify-content: center;
 }
 
-.reward-option:hover {
-  border-color: var(--global-brand-primary-20);
-  background-color: var(--global-neutral-grey-70);
-  transform: translateY(-2px);
+.reward-earned-label {
+  color: #7D7D7D;
+  font-family: "Space Grotesk";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 120%; /* 14.4px */
+  letter-spacing: -0.24px;
 }
 
-.reward-option-icon {
-  font-size: 32px;
+.reward-currency-icon {
   flex-shrink: 0;
 }
 
-.reward-option-content {
-  flex: 1;
+.reward-earned-amount {
+  color: var(--global-neutral-white, #FFF);
+  font-family: "Space Grotesk";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 120%; /* 14.4px */
+  letter-spacing: -0.24px;
 }
 
-.reward-option-content h3 {
-  font-size: 18px;
-  font-weight: var(--font-weight-bold);
-  color: var(--global-neutral-white);
-  margin: 0 0 var(--spacing-xs) 0;
-}
-
-.reward-option-content p {
-  font-size: 14px;
-  color: var(--global-neutral-grey-30);
-  margin: 0;
+.reward-keep-playing-button {
+  width: 100%;
 }

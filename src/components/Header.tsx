@@ -113,7 +113,7 @@ export function Header() {
                     }}
                     className="dropdown-top-up-button"
                   >
-                    Top Up
+                    Top up 5K
                   </Button>
                 </div>
               </div>

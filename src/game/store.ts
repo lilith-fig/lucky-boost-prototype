@@ -205,9 +205,9 @@ class GameStore {
     this.notify();
   }
 
-  // Top up USDC balance to $1,000
+  // Top up USDC balance - add $5,000 to current balance
   topUp(): void {
-    this.state.usdcBalance = 1000;
+    this.state.usdcBalance += 5000;
     saveState(this.state);
     this.notify();
   }

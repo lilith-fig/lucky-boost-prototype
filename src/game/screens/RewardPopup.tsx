@@ -1,5 +1,7 @@
 import { gameStore } from '../store';
 import { Modal } from '../../design-system/Modal';
+import { Button } from '../../design-system/Button';
+import { CreditIcon } from '../../components/CreditIcon';
 import './RewardPopup.css';
 
 export function RewardPopup() {
@@ -9,46 +11,35 @@ export function RewardPopup() {
     return null;
   }
 
-  const handleClaimCredits = () => {
+  const handleKeepPlaying = () => {
     gameStore.claimReward('credits');
-  };
-
-  const handleClaimGuaranteedPull = () => {
-    gameStore.claimReward('guaranteedPull');
   };
 
   return (
     <Modal isOpen={true} onClose={() => {}}>
       <div className="reward-popup">
         <div className="reward-header">
-          <div className="reward-icon">🎉</div>
-          <h2>Lucky Boost Complete!</h2>
-          <p>Choose your reward:</p>
+          <img 
+            src="/lucky-boost-logo.png" 
+            alt="Lucky Boost" 
+            className="reward-logo"
+          />
+          <h2>Your Lucky Boost is fully charged!</h2>
+          <div className="reward-earned">
+            <span className="reward-earned-label">You've earned</span>
+            <CreditIcon size={12} className="reward-currency-icon" />
+            <span className="reward-earned-amount">$25.00</span>
+          </div>
         </div>
 
-        <div className="reward-options">
-          <button
-            className="reward-option"
-            onClick={handleClaimCredits}
-          >
-            <div className="reward-option-icon">💰</div>
-            <div className="reward-option-content">
-              <h3>+$25.00 Credits</h3>
-              <p>Add credits to your balance</p>
-            </div>
-          </button>
-
-          <button
-            className="reward-option"
-            onClick={handleClaimGuaranteedPull}
-          >
-            <div className="reward-option-icon">✨</div>
-            <div className="reward-option-content">
-              <h3>1 Guaranteed Pull</h3>
-              <p>Open a pack with guaranteed value</p>
-            </div>
-          </button>
-        </div>
+        <Button
+          variant="primary"
+          size="large"
+          onClick={handleKeepPlaying}
+          className="reward-keep-playing-button"
+        >
+          Keep playing
+        </Button>
       </div>
     </Modal>
   );

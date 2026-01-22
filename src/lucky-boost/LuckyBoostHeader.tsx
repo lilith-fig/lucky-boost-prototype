@@ -3,6 +3,7 @@ import { Tooltip } from '../design-system/Tooltip';
 import { useLuckyBoost } from './useLuckyBoost';
 import { getProgressPercentage, getCurrentMilestone, MILESTONES } from './types';
 import { LuckyBoostIcon } from './LuckyBoostIcon';
+import { CreditIcon } from '../components/CreditIcon';
 import './LuckyBoostHeader.css';
 
 interface LuckyBoostHeaderProps {
@@ -67,7 +68,7 @@ export const LuckyBoostHeader: React.FC<LuckyBoostHeaderProps> = ({ onClick }) =
           {nextMilestone && (
             <div className="tooltip-next-reward">
               <span>Next reward</span>
-              <span className="currency-icon">$</span>
+              <CreditIcon size={14} />
               <span>
                 {nextMilestone.reward.credits
                   ? `$${nextMilestone.reward.credits.toFixed(2)}`

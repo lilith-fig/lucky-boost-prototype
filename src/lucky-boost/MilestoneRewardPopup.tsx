@@ -3,6 +3,7 @@ import { Modal } from '../design-system/Modal';
 import { Button } from '../design-system/Button';
 import { MILESTONES } from './types';
 import { luckyBoostStore } from './store';
+import { CreditIcon } from '../components/CreditIcon';
 import './MilestoneRewardPopup.css';
 
 interface MilestoneRewardPopupProps {
@@ -59,7 +60,7 @@ export const MilestoneRewardPopup: React.FC<MilestoneRewardPopupProps> = ({
         <div className="reward-details">
           {milestone.reward.credits ? (
             <div className="reward-credits">
-              <span className="currency-icon-large">$</span>
+              <CreditIcon size={24} />
               <span className="reward-amount">${milestone.reward.credits.toFixed(2)}</span>
               <span className="reward-label">Credits</span>
             </div>

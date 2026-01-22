@@ -137,7 +137,7 @@ export const LuckyBoostIcon: React.FC<LuckyBoostIconProps> = ({
             className="icon-percentage"
             style={{
               position: 'absolute',
-              top: '26px',
+              top: '27px',
               left: '20px',
               transform: 'translate(-50%, -50%)'
             }}

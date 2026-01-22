@@ -11,6 +11,7 @@ import {
   PackOpenResult,
 } from './types';
 import { formatCurrency } from '../utils/formatCurrency';
+import { CreditIcon } from '../components/CreditIcon';
 import './LuckyBoostModal.css';
 
 interface LuckyBoostModalProps {
@@ -69,7 +70,7 @@ export const LuckyBoostModal: React.FC<LuckyBoostModalProps> = ({
                 {nextMilestone && (
                   <div className="next-reward">
                     <span>Next reward</span>
-                    <span className="currency-icon">$</span>
+                    <CreditIcon size={14} />
                     <span>
                       {nextMilestone.reward.credits
                         ? `$${nextMilestone.reward.credits.toFixed(2)}`
@@ -94,7 +95,7 @@ export const LuckyBoostModal: React.FC<LuckyBoostModalProps> = ({
                       <div className="milestone-reward">
                         {milestone.reward.credits ? (
                           <>
-                            <span className="currency-icon">$</span>
+                            <CreditIcon size={14} />
                             <span>${milestone.reward.credits.toFixed(2)} credits</span>
                           </>
                         ) : (
