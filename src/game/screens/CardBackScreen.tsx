@@ -17,7 +17,7 @@ export function CardBackScreen() {
   };
 
 
-  const cardBackImage = theme === 'one-piece' ? '/card-back-op.png' : '/card-back-pkm.png';
+  const cardBackImage = theme === 'onepiece' ? '/card-back-op.png' : '/card-back-pkm.png';
 
   return (
     <div className="card-back-screen">

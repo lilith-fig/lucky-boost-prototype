@@ -111,7 +111,7 @@ class GameStore {
     this.state.packsOpened += 1;
 
     // Update Lucky Boost progress in the lucky boost store
-    const { progressAdded, milestonesReached } = luckyBoostStore.addPackOpen(
+    const { milestonesReached } = luckyBoostStore.addPackOpen(
       pack.price,
       card.value
     );

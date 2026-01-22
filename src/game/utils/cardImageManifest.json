@@ -7,16 +7,5 @@
     "/cards/pokemon/pkm-5.avif",
     "/cards/pokemon/pkm-6.avif"
   ],
-  "onepiece": [
-    "/cards/op/op-1.jpeg",
-    "/cards/op/op-2.jpeg",
-    "/cards/op/op-3.jpeg",
-    "/cards/op/op-4.jpeg",
-    "/cards/op/op-5.jpeg",
-    "/cards/op/op-6.jpeg",
-    "/cards/op/op-7.jpeg",
-    "/cards/op/op-8.jpeg",
-    "/cards/op/op-9.jpeg",
-    "/cards/op/op-10.jpeg"
-  ]
+  "onepiece": []
 }
