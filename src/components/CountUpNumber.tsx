@@ -19,7 +19,6 @@ export function CountUpNumber({
   decimals = 2
 }: CountUpNumberProps) {
   const [displayValue, setDisplayValue] = useState(value);
-  const [isAnimating, setIsAnimating] = useState(false);
   const previousValueRef = useRef<number | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
@@ -39,7 +38,6 @@ export function CountUpNumber({
         return;
       }
 
-      setIsAnimating(true);
       startTimeRef.current = Date.now();
 
       const animate = () => {
@@ -57,7 +55,6 @@ export function CountUpNumber({
         } else {
           setDisplayValue(endValue);
           previousValueRef.current = endValue;
-          setIsAnimating(false);
         }
       };
 
@@ -85,7 +82,6 @@ export function CountUpNumber({
       return;
     }
 
-    setIsAnimating(true);
     startTimeRef.current = Date.now();
 
     const animate = () => {
@@ -104,7 +100,6 @@ export function CountUpNumber({
         // Ensure final value is exact
         setDisplayValue(endValue);
         previousValueRef.current = endValue;
-        setIsAnimating(false);
       }
     };
 
@@ -118,7 +113,7 @@ export function CountUpNumber({
   }, [value, duration]);
 
   // Format the display value
-  const formattedValue = formatCurrency(displayValue);
+  const formattedValue = formatCurrency(displayValue, decimals);
 
   return (
     <span className={className}>

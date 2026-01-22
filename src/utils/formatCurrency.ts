@@ -1,11 +1,12 @@
 /**
- * Format a number with thousand separators and always show 2 decimal places
+ * Format a number with thousand separators and configurable decimal places
  * @param value - The number to format
+ * @param decimals - Number of decimal places (default: 2)
  * @returns Formatted string (e.g., "5,000.00")
  */
-export function formatCurrency(value: number): string {
+export function formatCurrency(value: number, decimals = 2): string {
   return value.toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
   });
 }

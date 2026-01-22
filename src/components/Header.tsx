@@ -5,7 +5,6 @@ import { useLuckyBoost } from '../lucky-boost/useLuckyBoost';
 import { Logo } from './Logo';
 import { CurrencyIcon } from './CurrencyIcon';
 import { Button } from '../design-system/Button';
-import { formatCurrency } from '../utils/formatCurrency';
 import { CountUpNumber } from './CountUpNumber';
 import './Header.css';
 
