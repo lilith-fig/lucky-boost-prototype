@@ -13,8 +13,8 @@ interface LuckyBoostHeaderMeterProps {
 
 export const LuckyBoostHeaderMeter: React.FC<LuckyBoostHeaderMeterProps> = ({ progress }) => {
   const state = useLuckyBoost();
-  const percentage = getProgressPercentage(state.currentProgress);
-  const milestone = getCurrentMilestone(state.currentProgress);
+  const percentage = getProgressPercentage(progress);
+  const milestone = getCurrentMilestone(progress);
   const nextMilestone = milestone
     ? MILESTONES.find((m) => m.id === milestone.id + 1)
     : MILESTONES[0];

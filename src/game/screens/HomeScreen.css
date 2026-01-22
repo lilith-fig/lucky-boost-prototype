@@ -56,9 +56,10 @@
   gap: 0px;
   align-items: center;
   width: 100%;
-  height: 293px;
+  height: 290px;
   box-sizing: border-box;
   position: relative;
+  overflow: visible;
 }
 
 .pack-card:hover {
@@ -74,16 +75,44 @@
   position: relative;
   flex: 1;
   min-height: 0;
+  height: 100%;
   border-radius: 8px;
   background: radial-gradient(57.69% 31.65% at 50% 100%, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.00) 100%), var(--global-neutral-grey-90, #101010);
+  overflow: hidden;
+}
+
+.pack-image-wrapper {
+  position: absolute;
+  top: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
 }
 
 .pack-image {
-  width: 118px;
-  height: 185px;
+  width: 110px;
+  height: 178px;
   box-sizing: border-box;
   object-fit: contain;
   display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.pack-image-reflection {
+  width: 110px;
+  height: 178px;
+  box-sizing: border-box;
+  object-fit: contain;
+  display: block;
+  transform: scaleY(-1);
+  opacity: 0.2;
+  position: relative;
+  margin-top: 0;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .pack-image-fallback {
@@ -114,14 +143,6 @@
 }
 
 .pack-name {
-  font-size: 18px;
-  font-weight: var(--font-weight-bold);
-  color: var(--global-neutral-white);
-  margin: 0;
-  line-height: 1.2;
-}
-
-.pack-price {
   color: var(--global-neutral-grey-20, #A4A4A4);
   text-align: center;
   font-family: "Space Grotesk";
@@ -130,6 +151,14 @@
   font-weight: 400;
   line-height: normal;
   margin: 0;
+}
+
+.pack-price {
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  color: var(--global-neutral-white);
+  margin: 0;
+  line-height: 1.2;
 }
 
 /* Pack Tag Label */

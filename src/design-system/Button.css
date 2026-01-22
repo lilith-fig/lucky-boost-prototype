@@ -48,9 +48,9 @@
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(168.688deg, rgb(236, 255, 111) 33.847%, rgb(224, 251, 41) 24.074%, rgb(248, 255, 205) 55.405%, rgb(224, 251, 41) 75.907%, rgb(236, 255, 111) 118.46%);
-  box-shadow: var(--shadow-inset), 0px 2px 8px rgba(211, 240, 21, 0.4);
-  filter: brightness(1.1);
+  background: linear-gradient(168.688deg, rgb(248, 255, 150) 33.847%, rgb(236, 255, 111) 24.074%, rgb(255, 255, 230) 55.405%, rgb(236, 255, 111) 75.907%, rgb(248, 255, 150) 118.46%);
+  box-shadow: var(--shadow-inset), 0px 2px 8px rgba(211, 240, 21, 0.5), 0px 0px 12px rgba(211, 240, 21, 0.3);
+  border-color: var(--global-brand-primary-10);
 }
 
 .btn-primary:disabled {

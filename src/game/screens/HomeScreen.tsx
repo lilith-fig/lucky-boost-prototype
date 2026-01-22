@@ -41,18 +41,32 @@ export function HomeScreen() {
                 
                 {/* Preview Section */}
                 <div className="pack-preview">
-                  <img 
-                    src={packImagePath}
-                    alt={pack.name}
-                    className="pack-image"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      if (target.nextElementSibling) {
-                        (target.nextElementSibling as HTMLElement).style.display = 'flex';
-                      }
-                    }}
-                  />
+                  <div className="pack-image-wrapper">
+                    <img 
+                      src={packImagePath}
+                      alt={pack.name}
+                      className="pack-image"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const wrapper = target.closest('.pack-image-wrapper');
+                        if (wrapper) {
+                          const fallback = wrapper.querySelector('.pack-image-fallback') as HTMLElement;
+                          if (fallback) fallback.style.display = 'flex';
+                        }
+                      }}
+                    />
+                    <img 
+                      src={packImagePath}
+                      alt=""
+                      className="pack-image-reflection"
+                      aria-hidden="true"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                    />
+                  </div>
                   <div className="pack-image-fallback" style={{ display: 'none' }}>
                     <div className="pack-fallback-icon">📦</div>
                   </div>
