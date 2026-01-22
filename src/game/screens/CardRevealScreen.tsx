@@ -58,88 +58,111 @@ export function CardRevealScreen() {
       return;
     }
 
-    // Calculate progress added from this pack open
-    const calculatedProgressAdded = calculateProgress(
-      result.packPrice,
-      result.card.value
-    );
-    setProgressAdded(calculatedProgressAdded);
-
-    // Get the actual current progress from lucky boost store (before pending update is applied)
-    const currentLuckyBoostState = luckyBoostStore.getState();
-    const previousProgressPercentage = getProgressPercentage(currentLuckyBoostState.currentProgress);
-    setPreviousProgress(previousProgressPercentage);
-
-    // The target progress is what's calculated in gameStore (for display)
-    const targetProgress = state.luckyBoostProgress;
+    // Only show meter and calculate progress if it's a loss (not a win)
+    // Wins (30% of packs) don't show meter UI
+    const isWin = result.isWin;
 
     // Stage 1: Show price after card is revealed (800ms delay)
     const priceDelay = setTimeout(() => {
       setShowPrice(true);
     }, 800);
 
-    // Stage 2: Show actions smoothly right after price appears (parallel with meter)
+    // Stage 2: Show actions smoothly right after price appears
     const actionsDelay = setTimeout(() => {
       setShowKeepSell(true);
     }, 1200); // 800ms (price) + 400ms (smooth transition)
 
-    // Stage 3: Show meter in parallel (doesn't block actions)
-    const meterDelay = setTimeout(() => {
-      setShowMeter(true);
-      
-      // Animate meter fill with smooth stacking animation
-      const targetProgressValue = targetProgress;
-      const duration = 1800; // 1.8s fill animation for smooth feel
-      const startTime = Date.now();
-      const startProgressValue = previousProgressPercentage;
+    // Stage 3: Show meter only if it's a loss (not a win)
+    if (!isWin) {
+      // Calculate progress added from this pack open
+      const calculatedProgressAdded = calculateProgress(
+        result.packPrice,
+        result.card.value
+      );
+      setProgressAdded(calculatedProgressAdded);
 
-      const animate = () => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // Ease-out cubic for smooth deceleration (non-linear as per requirements)
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const animatedProgress = startProgressValue + (targetProgressValue - startProgressValue) * eased;
-        
-        setMeterProgress(animatedProgress);
+      // Get the actual current progress from lucky boost store (before pending update is applied)
+      const currentLuckyBoostState = luckyBoostStore.getState();
+      const previousProgressPercentage = getProgressPercentage(currentLuckyBoostState.currentProgress);
+      setPreviousProgress(previousProgressPercentage);
 
-        if (progress < 1) {
+      // The target progress is what's calculated in gameStore (for display)
+      const targetProgress = state.luckyBoostProgress;
+
+      // Show meter in parallel (doesn't block actions)
+      const meterDelay = setTimeout(() => {
+        // First, set the meter to show current progress (starting point)
+        setMeterProgress(previousProgressPercentage);
+        setShowMeter(true);
+        
+        // Wait a brief moment so user can see the starting progress, then animate
+        setTimeout(() => {
+          // Animate meter fill with smooth stacking animation
+          const targetProgressValue = targetProgress;
+          const duration = 900; // 0.9s fill animation
+          const startTime = Date.now();
+          const startProgressValue = previousProgressPercentage;
+
+          const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Ease-out cubic for smooth deceleration (non-linear as per requirements)
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const animatedProgress = startProgressValue + (targetProgressValue - startProgressValue) * eased;
+            
+            setMeterProgress(animatedProgress);
+
+            if (progress < 1) {
+              requestAnimationFrame(animate);
+            } else {
+              // After meter animation completes, apply pending store updates
+              // This updates the header icon without spoiling the result
+              if (typeof gameStore.applyPendingLuckyBoostUpdate === 'function') {
+                gameStore.applyPendingLuckyBoostUpdate();
+              }
+
+              // Check if meter is full
+              if (targetProgressValue >= 100) {
+                setIsMeterFull(true);
+                // Show reward modal after light-up animation completes
+                setTimeout(() => {
+                  // Clear the old reward popup to prevent duplicate popups
+                  // The RewardModal in CardRevealScreen will be shown instead
+                  gameStore.clearRewardPopup();
+                  setShowRewardModal(true);
+                }, 1200);
+              }
+              
+              // Always remain for 2s after animation ends, then dismiss
+              if (dismissTimeoutRef.current) clearTimeout(dismissTimeoutRef.current);
+              dismissTimeoutRef.current = setTimeout(() => {
+                setShowMeter(false);
+                dismissTimeoutRef.current = null;
+              }, 2000);
+            }
+          };
+
           requestAnimationFrame(animate);
-        } else {
-          // After meter animation completes, apply pending store updates
-          // This updates the header icon without spoiling the result
-          gameStore.applyPendingLuckyBoostUpdate();
+        }, 150); // Brief pause to show starting progress before animation
+      }, 300); // Start meter sooner - runs in parallel with price/actions
 
-          // Check if meter is full
-          if (targetProgressValue >= 100) {
-            setIsMeterFull(true);
-            // Show reward modal after light-up animation completes
-            setTimeout(() => {
-              setShowRewardModal(true);
-            }, 1200);
-          }
-          
-          // Always remain for 2s after animation ends, then dismiss
-          if (dismissTimeoutRef.current) clearTimeout(dismissTimeoutRef.current);
-          dismissTimeoutRef.current = setTimeout(() => {
-            setShowMeter(false);
-            dismissTimeoutRef.current = null;
-          }, 2000);
+      return () => {
+        clearTimeout(priceDelay);
+        clearTimeout(actionsDelay);
+        clearTimeout(meterDelay);
+        if (dismissTimeoutRef.current) {
+          clearTimeout(dismissTimeoutRef.current);
+          dismissTimeoutRef.current = null;
         }
       };
-
-      requestAnimationFrame(animate);
-    }, 600); // Start meter animation sooner - runs in parallel with price/actions
-
-    return () => {
-      clearTimeout(priceDelay);
-      clearTimeout(actionsDelay);
-      clearTimeout(meterDelay);
-      if (dismissTimeoutRef.current) {
-        clearTimeout(dismissTimeoutRef.current);
-        dismissTimeoutRef.current = null;
-      }
-    };
+    } else {
+      // Win: don't show meter, just return cleanup for price/actions
+      return () => {
+        clearTimeout(priceDelay);
+        clearTimeout(actionsDelay);
+      };
+    }
   }, [result, state.luckyBoostProgress]);
 
   useEffect(() => {
@@ -224,10 +247,12 @@ export function CardRevealScreen() {
                     setIsSelling(true);
                     setTimeout(() => {
                       toastStore.showToast('Card sold successfully');
-                      gameStore.sellCard({ stayOnReveal: true });
+                      // Clear any old reward popup to prevent duplicate popups
+                      gameStore.clearRewardPopup();
                       setIsSelling(false);
                       setHasSold(true);
-                    }, 2000);
+                      setShowRewardModal(true); // Show the RewardModal in CardRevealScreen
+                    }, 1000);
                   }}
                   className={isSelling ? 'btn-loading' : ''}
                   disabled={isSelling}

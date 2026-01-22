@@ -1,13 +1,13 @@
 import { useEffect, useMemo } from 'react';
 import { Tooltip } from '../../design-system/Tooltip';
 import { CreditIcon } from '../../components/CreditIcon';
-import { getCurrentMilestone, MILESTONES, MAX_PROGRESS } from '../../lucky-boost/types';
+import { getCurrentMilestone, MILESTONES, MAX_PROGRESS, getProgressPercentage } from '../../lucky-boost/types';
 import './ResultLuckyBoostMeter.css';
 
 interface ResultLuckyBoostMeterProps {
   progress: number; // 0-100 (current progress)
   previousProgress: number; // 0-100 (progress before this pack open)
-  progressAdded: number; // The amount of progress added from this pack open
+  progressAdded: number; // The amount of progress added in dollars (from calculateProgress)
   isFull: boolean;
   onDismiss?: () => void;
 }
@@ -35,14 +35,21 @@ export function ResultLuckyBoostMeter({ progress, previousProgress, progressAdde
     }
   }, [isFull]);
 
+  // Convert progressAdded from dollars to percentage
+  const progressAddedPercentage = getProgressPercentage(progressAdded);
+  
   // Calculate the increased zone (the new progress added)
   const increasedZoneStart = previousProgress;
   const increasedZoneEnd = percentage;
   const increasedZoneWidth = Math.max(0, increasedZoneEnd - increasedZoneStart);
+  
+  // Calculate target progress (where the bar will end up) for the hint preview
+  // This should match the final progress value
+  const targetProgress = Math.min(100, Math.max(0, previousProgress + progressAddedPercentage));
 
   const tooltipContent = progressAdded > 0 ? (
     <div className="result-meter-tooltip">
-      +{progressAdded}%
+      +{progressAddedPercentage.toFixed(1)}%
     </div>
   ) : null;
 
@@ -76,6 +83,14 @@ export function ResultLuckyBoostMeter({ progress, previousProgress, progressAdde
           <div className="result-meter-progress-bar">
             {/* Background */}
             <div className="result-meter-progress-bg"></div>
+            
+            {/* Hint/preview bar showing target progress at 20% opacity */}
+            {progressAdded > 0 && (
+              <div 
+              className="result-meter-progress-hint"
+              style={{ width: `${targetProgress}%` }}
+            />
+            )}
             
             {/* Total progress fill (existing + new) */}
             <div 

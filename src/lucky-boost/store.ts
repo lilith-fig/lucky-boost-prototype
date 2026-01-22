@@ -22,7 +22,7 @@ function loadState(): LuckyBoostState {
       
       // Migration: Normalize progress to be within bounds (0 to MAX_PROGRESS)
       if (parsed.currentProgress !== undefined) {
-        // Cap progress at MAX_PROGRESS ($500)
+        // Cap progress at MAX_PROGRESS ($1000)
         if (parsed.currentProgress > MAX_PROGRESS) {
           parsed.currentProgress = MAX_PROGRESS;
         } else if (parsed.currentProgress < 0) {
@@ -95,7 +95,7 @@ class LuckyBoostStore {
     // Add progress (in dollars)
     const newProgress = this.state.currentProgress + progressAdded;
     
-    // Check if we've reached the milestone (100% = $500)
+    // Check if we've reached the milestone (100% = $1000)
     const milestonesReached: number[] = [];
     let finalProgress = newProgress;
     let finalMilestoneIndex = this.state.currentMilestoneIndex;

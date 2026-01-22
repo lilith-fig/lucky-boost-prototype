@@ -30,25 +30,21 @@ export interface LuckyBoostState {
 }
 
 // Milestones are now based on dollar amounts
-// 100% = $500 total losses
+// 100% = $1000 total losses
 export const MILESTONES: Milestone[] = [
-  { id: 1, start: 0, end: 500, reward: { credits: 5 } },
+  { id: 1, start: 0, end: 1000, reward: { credits: 5 } },
 ];
 
-// Maximum progress for 100% meter
-export const MAX_PROGRESS = 500;
+// Maximum progress for 100% meter ($1000 = 100%)
+export const MAX_PROGRESS = 1000;
 
 /**
- * Calculate Lucky Boost progress based on pack price.
- * - Only losses can add progress
- * - Progress = 10% of pack price spent
- * - 100% meter = $500 total losses
- * 
- * Examples:
- * - $25 pack loss: $2.50 progress
- * - $50 pack loss: $5.00 progress
- * - $100 pack loss: $10.00 progress
- * - $250 pack loss: $25.00 progress
+ * Calculate Lucky Boost progress from a pack open.
+ * - Only losses add progress (card value < pack price)
+ * - Lost amount = pack price - card value
+ * - Progress added (dollars) = lost amount
+ * - % gain = loss amount / $1000 * 100
+ * - Meter: $1000 = 100%
  */
 export function calculateProgress(
   packPrice: number,
@@ -56,15 +52,12 @@ export function calculateProgress(
 ): number {
   const isWin = cardValue >= packPrice;
   
-  // Wins give no progress
   if (isWin) {
     return 0;
   }
   
-  // Only losses add progress: 10% of pack price
-  const progress = packPrice * 0.1;
-  
-  return progress;
+  const lostAmount = packPrice - cardValue;
+  return lostAmount;
 }
 
 export function getCurrentMilestone(progress: number): Milestone | null {
@@ -80,7 +73,7 @@ export function getProgressInCurrentMilestone(progress: number): number {
 }
 
 export function getProgressPercentage(progress: number): number {
-  // Calculate percentage based on $500 max (100% = $500)
+  // % gain = loss amount / $1000 * 100
   const percentage = (progress / MAX_PROGRESS) * 100;
   return Math.min(100, Math.max(0, percentage));
 }

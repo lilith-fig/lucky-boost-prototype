@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Tooltip } from '../design-system/Tooltip';
 import { useLuckyBoost } from './useLuckyBoost';
 import { getProgressPercentage, getCurrentMilestone, MILESTONES } from './types';
@@ -19,7 +19,7 @@ export const LuckyBoostMeter: React.FC<LuckyBoostMeterProps> = ({ onClick }) => 
     ? MILESTONES.find((m) => m.id === milestone.id + 1)
     : MILESTONES[0];
 
-  const tooltipContent = (
+  const tooltipContent = useMemo(() => (
     <div className="lucky-boost-tooltip-content">
       <div className="tooltip-header">
         <LuckyBoostLogo size={24} />
@@ -60,7 +60,7 @@ export const LuckyBoostMeter: React.FC<LuckyBoostMeterProps> = ({ onClick }) => 
         </p>
       )}
     </div>
-  );
+  ), [percentage, nextMilestone, state.lastProgressAdded]);
 
   return (
     <Tooltip content={tooltipContent} position="bottom">

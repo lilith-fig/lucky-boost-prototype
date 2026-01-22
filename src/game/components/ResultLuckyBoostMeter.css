@@ -60,6 +60,18 @@
   height: 100%;
   background: var(--global-neutral-grey-70, #2a2a2a);
   border-radius: 4px;
+  z-index: 0;
+}
+
+.result-meter-progress-hint {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #F27D05 0%, #FFCF77 33.33%, #FEC22B 66.66%, #D3FF0F 100%);
+  border-radius: 4px;
+  opacity: 0.2;
+  z-index: 1;
 }
 
 .result-meter-progress-existing {
@@ -69,7 +81,7 @@
   height: 100%;
   background: linear-gradient(90deg, #F27D05 0%, #FFCF77 33.33%, #FEC22B 66.66%, #D3FF0F 100%);
   border-radius: 4px;
-  transition: width 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.9s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1;
 }
 
@@ -79,7 +91,7 @@
   height: 100%;
   background: linear-gradient(90deg, #F27D05 0%, #FFCF77 33.33%, #FEC22B 66.66%, #D3FF0F 100%);
   border-radius: 4px;
-  transition: width 1.8s cubic-bezier(0.4, 0, 0.2, 1), left 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.9s cubic-bezier(0.4, 0, 0.2, 1), left 0.9s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 3;
   animation: progressPulse 0.5s ease-out;
   cursor: pointer;
@@ -104,8 +116,8 @@
   height: 100%;
   background: linear-gradient(90deg, #F27D05 0%, #FFCF77 33.33%, #FEC22B 66.66%, #D3FF0F 100%);
   border-radius: 4px;
-  transition: width 1.8s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 1;
+  transition: width 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
 }
 
 .result-meter-tooltip-wrapper {

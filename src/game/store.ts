@@ -93,16 +93,11 @@ class GameStore {
 
   // Lucky Boost calculation (for display purposes)
   // Uses the same formula as calculateProgress in lucky-boost/types.ts
+  // Loss: progress = pack price - card value; $1000 = 100%
   calculateLuckyBoostProgress(packPrice: number, cardValue: number): number {
     const isWin = cardValue >= packPrice;
-    
-    // Wins give no progress
-    if (isWin) {
-      return 0;
-    }
-    
-    // Only losses add progress: 10% of pack price
-    return packPrice * 0.1;
+    if (isWin) return 0;
+    return packPrice - cardValue;
   }
 
   // Open a pack
@@ -124,39 +119,52 @@ class GameStore {
     this.state.usdcBalance -= pack.price;
     this.state.packsOpened += 1;
 
-    // Calculate what the progress update would be, but don't apply it yet
-    // Store it as pending to avoid spoiling the result in the header
-    const progressAdded = calculateProgress(pack.price, card.value);
+    // Only calculate progress and update meter if it's a loss (card value < pack price)
+    // Wins (30% of packs) don't add to meter and don't show meter UI
+    const isWin = card.value >= pack.price;
     
-    // Calculate what milestones would be reached (without actually updating stores)
-    const currentState = luckyBoostStore.getState();
-    const currentMilestone = MILESTONES[currentState.currentMilestoneIndex];
-    let milestonesReached: number[] = [];
-    
-    if (currentMilestone && progressAdded > 0) {
-      const newProgress = currentState.currentProgress + progressAdded;
+    if (!isWin) {
+      // Calculate what the progress update would be, but don't apply it yet
+      // Store it as pending to avoid spoiling the result in the header
+      const progressAdded = calculateProgress(pack.price, card.value);
       
-      // Check if we've reached the milestone (100% = $500)
-      if (newProgress >= currentMilestone.end) {
-        milestonesReached.push(currentMilestone.id);
+      // Calculate what milestones would be reached (without actually updating stores)
+      const currentState = luckyBoostStore.getState();
+      const currentMilestone = MILESTONES[currentState.currentMilestoneIndex];
+      let milestonesReached: number[] = [];
+      
+      if (currentMilestone && progressAdded > 0) {
+        const newProgress = currentState.currentProgress + progressAdded;
+        
+        // Check if we've reached the milestone (100% = $1000)
+        if (newProgress >= currentMilestone.end) {
+          milestonesReached.push(currentMilestone.id);
+        }
       }
+      
+      // Store pending update (will be applied after card reveal sequence)
+      this.state.pendingLuckyBoostUpdate = {
+        packPrice: pack.price,
+        cardValue: card.value,
+        milestonesReached,
+      };
+      
+      // Calculate what the new progress would be for display purposes (but don't update stores)
+      // Progress is tracked in dollars, 100% = $1000
+      const luckyBoostState = luckyBoostStore.getState();
+      const newProgressDollars = luckyBoostState.currentProgress + progressAdded;
+      const newProgress = Math.min(100, Math.max(0, (newProgressDollars / MAX_PROGRESS) * 100));
+      
+      // Update local progress for calculation purposes (stores will be updated later)
+      this.state.luckyBoostProgress = newProgress;
+    } else {
+      // Win: don't add to meter, clear any pending update
+      this.state.pendingLuckyBoostUpdate = undefined;
+      // Keep current progress unchanged
+      const luckyBoostState = luckyBoostStore.getState();
+      const currentProgress = Math.min(100, Math.max(0, (luckyBoostState.currentProgress / MAX_PROGRESS) * 100));
+      this.state.luckyBoostProgress = currentProgress;
     }
-    
-    // Store pending update (will be applied after card reveal sequence)
-    this.state.pendingLuckyBoostUpdate = {
-      packPrice: pack.price,
-      cardValue: card.value,
-      milestonesReached,
-    };
-    
-    // Calculate what the new progress would be for display purposes (but don't update stores)
-    // Progress is tracked in dollars, 100% = $500
-    const luckyBoostState = luckyBoostStore.getState();
-    const newProgressDollars = luckyBoostState.currentProgress + progressAdded;
-    const newProgress = Math.min(100, Math.max(0, (newProgressDollars / MAX_PROGRESS) * 100));
-    
-    // Update local progress for calculation purposes (stores will be updated later)
-    this.state.luckyBoostProgress = newProgress;
 
     const result: PackOpenResult = {
       card,
@@ -165,6 +173,14 @@ class GameStore {
       timestamp: Date.now(),
       theme: pack.theme,
     };
+
+    // Ensure state and result are properly defined before proceeding
+    if (!this.state) {
+      throw new Error('Game state is undefined.');
+    }
+    if (!result) {
+      throw new Error('Result is undefined.');
+    }
 
     this.state.lastResult = result;
     saveState(this.state);
@@ -201,7 +217,13 @@ class GameStore {
   // Sell card (add value to USDC balance)
   sellCard(options?: { stayOnReveal?: boolean }): void {
     if (this.state.lastResult) {
+      // Add card value to USDC balance
       this.state.usdcBalance += this.state.lastResult.card.value;
+
+      // Optionally clear lastResult so card can't be sold again
+      if (!options?.stayOnReveal) {
+        this.state.lastResult = null;
+      }
     }
 
     if (options?.stayOnReveal) {
@@ -241,6 +263,13 @@ class GameStore {
     this.state.selectedPack = null;
     this.state.lastResult = null;
     
+    saveState(this.state);
+    this.notify();
+  }
+
+  // Clear reward popup (used when showing RewardModal in CardRevealScreen instead)
+  clearRewardPopup(): void {
+    this.state.showRewardPopup = false;
     saveState(this.state);
     this.notify();
   }
@@ -293,7 +322,7 @@ class GameStore {
     }
     
     // Update gameStore's luckyBoostProgress to match (for backward compatibility)
-    // Progress is tracked in dollars, 100% = $500
+    // Progress is tracked in dollars, 100% = $1000
     const luckyBoostState = luckyBoostStore.getState();
     const newProgress = Math.min(100, Math.max(0, (luckyBoostState.currentProgress / MAX_PROGRESS) * 100));
     
