@@ -246,12 +246,17 @@ export function CardRevealScreen() {
                   onClick={() => {
                     setIsSelling(true);
                     setTimeout(() => {
+                      // Actually sell the card to update balance
+                      gameStore.sellCard({ stayOnReveal: true });
                       toastStore.showToast('Card sold successfully');
                       // Clear any old reward popup to prevent duplicate popups
                       gameStore.clearRewardPopup();
                       setIsSelling(false);
                       setHasSold(true);
-                      setShowRewardModal(true); // Show the RewardModal in CardRevealScreen
+                      // Only show RewardModal if meter is full (100%)
+                      if (isMeterFull) {
+                        setShowRewardModal(true);
+                      }
                     }, 1000);
                   }}
                   className={isSelling ? 'btn-loading' : ''}

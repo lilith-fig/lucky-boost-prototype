@@ -25,7 +25,12 @@ export const Modal = ({ isOpen, onClose, title, className = '', children }: Moda
             <h2 className="modal-title">{title}</h2>
           </div>
         )}
-        <button className="modal-close" onClick={onClose} aria-label="Close modal">
+        <button
+          className="modal-close"
+          onClick={onClose}
+          aria-label="Close modal"
+          title="Click to dismiss popup"
+        >
           ×
         </button>
         {children}

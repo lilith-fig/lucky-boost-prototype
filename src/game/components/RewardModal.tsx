@@ -1,5 +1,6 @@
 import { Modal } from '../../design-system/Modal';
 import { Button } from '../../design-system/Button';
+import { CreditIcon } from '../../components/CreditIcon';
 import './RewardModal.css';
 
 interface RewardModalProps {
@@ -10,21 +11,19 @@ export function RewardModal({ onClose }: RewardModalProps) {
   return (
     <Modal isOpen={true} onClose={onClose} className="reward-modal">
       <div className="reward-modal-content">
-        <div className="reward-visual">
-          <div className="reward-icon-large">🎉</div>
-          <div className="reward-glow"></div>
-        </div>
-        
-        <div className="reward-text">
-          <h2 className="reward-title">Lucky Boost Complete!</h2>
-          <p className="reward-description">
-            You've reached 100% Lucky Boost progress
-          </p>
-        </div>
+        <img 
+          src="/lucky-boost-logo.png" 
+          alt="Lucky Boost" 
+          className="reward-logo"
+        />
 
         <div className="reward-amount">
-          <div className="reward-amount-label">Reward</div>
-          <div className="reward-amount-value">+$25</div>
+          <div className="reward-amount-label">Your Lucky Boost is fully charged!</div>
+          <div className="reward-earned">
+            <span className="reward-earned-label">You've earned</span>
+            <CreditIcon size={12} className="reward-currency-icon" />
+            <div className="reward-amount-value">+$25</div>
+          </div>
         </div>
 
         <Button

@@ -328,8 +328,8 @@ class GameStore {
     
     this.state.luckyBoostProgress = newProgress;
     
-    // If we hit milestones, trigger reward popup
-    if (milestonesReached.length > 0 && !this.state.showRewardPopup) {
+    // Only trigger reward popup when meter reaches 100% (not just when milestones are reached)
+    if (newProgress >= 100 && !this.state.showRewardPopup) {
       this.state.showRewardPopup = true;
     }
 
