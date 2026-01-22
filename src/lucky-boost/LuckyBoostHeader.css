@@ -1,0 +1,176 @@
+.lucky-boost-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--global-neutral-grey-80);
+  border: 1px solid var(--global-neutral-grey-70);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.lucky-boost-header:hover {
+  border-color: var(--global-brand-primary-20);
+  background: var(--global-neutral-grey-70);
+}
+
+/* Icon is now handled by LuckyBoostIcon component */
+
+.header-label {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  font-size: 14px;
+  color: var(--global-neutral-white);
+  white-space: nowrap;
+}
+
+.header-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex: 1;
+  min-width: 0;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--global-neutral-grey-70);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  position: relative;
+  min-width: 60px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--gradient-progress);
+  border-radius: var(--radius-sm);
+  transition: width 0.5s ease;
+}
+
+.progress-percentage {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  font-size: 12px;
+  color: var(--global-brand-primary-20);
+  white-space: nowrap;
+  min-width: 32px;
+  text-align: right;
+}
+
+/* Tooltip styles (reused from LuckyBoostMeter) */
+.lucky-boost-tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  max-width: 373px;
+}
+
+.tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.tooltip-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--global-brand-primary-20);
+}
+
+.tooltip-title {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  font-size: 14px;
+  color: var(--global-brand-primary-20);
+  background: linear-gradient(180deg, #d3f015 0%, #ecff6f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tooltip-description {
+  font-family: var(--font-family);
+  font-size: 14px;
+  color: var(--global-neutral-white);
+  line-height: 1.5;
+}
+
+.tooltip-note {
+  font-family: var(--font-family);
+  font-size: 12px;
+  color: var(--global-neutral-grey-30);
+  letter-spacing: -0.24px;
+}
+
+.tooltip-progress-section {
+  background: var(--global-neutral-grey-80);
+  border: 1px solid var(--global-neutral-grey-70);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.tooltip-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--global-neutral-grey-70);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+}
+
+.tooltip-progress-fill {
+  height: 100%;
+  background: var(--gradient-progress);
+  border-radius: var(--radius-md);
+  transition: width 0.5s ease;
+}
+
+.tooltip-progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tooltip-progress-percentage {
+  font-family: var(--font-family);
+  font-size: 12px;
+  color: var(--global-neutral-grey-30);
+  letter-spacing: -0.24px;
+}
+
+.tooltip-next-reward {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-family: var(--font-family);
+  font-size: 12px;
+  color: var(--global-neutral-grey-30);
+  letter-spacing: -0.24px;
+}
+
+.currency-icon {
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle, #ffd700 0%, #ffed4e 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: var(--global-neutral-black);
+  font-weight: var(--font-weight-bold);
+}
+
+.tooltip-last-update {
+  font-family: var(--font-family);
+  font-size: 12px;
+  color: var(--global-neutral-grey-30);
+  letter-spacing: -0.24px;
+}

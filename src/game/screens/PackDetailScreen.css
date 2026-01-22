@@ -1,0 +1,126 @@
+.pack-detail-screen {
+  min-height: 100vh;
+  background-color: #060606;
+  color: var(--global-neutral-white);
+}
+
+.detail-header {
+  padding: var(--spacing-lg) var(--spacing-2xl);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Back button now uses Button component - no custom styles needed */
+
+.detail-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-2xl);
+}
+
+.pack-detail-layout {
+  display: flex;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-2xl);
+  align-items: start;
+  max-width: 100%;
+  height: 624px;
+}
+
+/* Preview Section */
+.pack-preview-section {
+  width: 100%;
+}
+
+.pack-preview-bg {
+  width: 637px;
+  height: 560px;
+  aspect-ratio: 43 / 61;
+  background: radial-gradient(57.69% 31.65% at 50% 100%, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.00) 100%), var(--global-neutral-grey-90);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--global-neutral-grey-60);
+}
+
+.pack-preview-image {
+  width: 100%;
+  max-width: 100%;
+  height: 416px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+}
+
+.pack-preview-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pack-fallback-icon {
+  font-size: 80px;
+  opacity: 0.5;
+}
+
+/* Info Section */
+.pack-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  width: 100%;
+}
+
+.pack-detail-name {
+  font-size: 24px;
+  font-weight: var(--font-weight-bold);
+  color: var(--global-neutral-white);
+  margin: 0;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+}
+
+.pack-price-section {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.pack-price-large {
+  font-size: 32px;
+  font-weight: var(--font-weight-bold);
+  color: var(--global-brand-primary-20);
+  line-height: 1.2;
+}
+
+.pack-open-button {
+  width: 100%;
+  margin-top: var(--spacing-md);
+}
+
+.insufficient-credits {
+  font-size: 14px;
+  color: var(--global-neutral-grey-30);
+  margin: 0;
+  margin-top: calc(-1 * var(--spacing-sm));
+  line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pack-detail-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .pack-preview-bg {
+    max-width: 300px;
+    margin: 0 auto;
+  }
+}

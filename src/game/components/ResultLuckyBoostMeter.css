@@ -1,0 +1,171 @@
+.result-lucky-boost-meter {
+  position: fixed;
+  bottom: var(--spacing-2xl);
+  right: var(--spacing-2xl);
+  z-index: 100;
+  animation: meterSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes meterSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.result-meter-container {
+  background: var(--global-neutral-grey-80, #171717);
+  border: 1px solid var(--global-neutral-grey-70, #2a2a2a);
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 320px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.result-meter-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.result-meter-logo {
+  height: 24px;
+  width: auto;
+  object-fit: contain;
+}
+
+.result-meter-progress-container {
+  width: 100%;
+}
+
+.result-meter-progress-bar {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  overflow: visible;
+}
+
+.result-meter-progress-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--global-neutral-grey-70, #2a2a2a);
+  border-radius: 4px;
+}
+
+.result-meter-progress-existing {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #F27D05 0%, #FFCF77 33.33%, #FEC22B 66.66%, #D3FF0F 100%);
+  border-radius: 4px;
+  transition: width 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+.result-meter-progress-increased {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #F27D05 0%, #FFCF77 33.33%, #FEC22B 66.66%, #D3FF0F 100%);
+  border-radius: 4px;
+  transition: width 1.8s cubic-bezier(0.4, 0, 0.2, 1), left 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 3;
+  animation: progressPulse 0.5s ease-out;
+  cursor: pointer;
+}
+
+@keyframes progressPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(211, 240, 21, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 8px 2px rgba(211, 240, 21, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(211, 240, 21, 0);
+  }
+}
+
+.result-meter-progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #F27D05 0%, #FFCF77 33.33%, #FEC22B 66.66%, #D3FF0F 100%);
+  border-radius: 4px;
+  transition: width 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+.result-meter-tooltip-wrapper {
+  position: absolute;
+  z-index: 10;
+  height: 100%;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.result-meter-tooltip-wrapper .tooltip-trigger {
+  height: 100%;
+  width: 100%;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.result-meter-tooltip {
+  background: var(--global-neutral-grey-80, #171717);
+  border: 1px solid var(--global-neutral-grey-70, #2a2a2a);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: var(--font-family, 'Space Grotesk');
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--global-brand-primary-20, #D3FF0F);
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Full meter state - light-up */
+.result-lucky-boost-meter.meter-full {
+  animation: meterLightUp 0.6s ease-out;
+}
+
+.result-lucky-boost-meter.meter-full .result-meter-progress-fill,
+.result-lucky-boost-meter.meter-full .result-meter-progress-increased {
+  animation: meterPulse 2s ease-in-out infinite;
+  box-shadow: 0 0 12px rgba(211, 240, 21, 0.6);
+}
+
+@keyframes meterLightUp {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes meterPulse {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(211, 240, 21, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(211, 240, 21, 0.9);
+  }
+}

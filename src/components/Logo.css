@@ -1,0 +1,35 @@
+.app-logo {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.app-logo:hover {
+  opacity: 0.8;
+}
+
+.logo-image {
+  height: 40px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.logo-fallback {
+  display: none;
+}
+
+.logo-text {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  font-size: 20px;
+  line-height: 1;
+  background: linear-gradient(90deg, #d3f015 0%, #ecff6f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.5px;
+  margin: 0;
+}

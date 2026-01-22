@@ -1,0 +1,49 @@
+.tooltip-trigger {
+  display: inline-block;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 2000;
+  pointer-events: auto;
+  /* Hide until position is ready */
+  opacity: 0;
+  visibility: hidden;
+  /* Do not transition position properties - transform is used for positioning */
+  transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+}
+
+/* When positioning, keep hidden */
+.tooltip-positioning {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0s, visibility 0s;
+}
+
+/* When position is ready, show with fade animation */
+.tooltip-ready {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.2s ease, visibility 0s;
+}
+
+/* Tooltip content wrapper for scale animation (doesn't interfere with positioning transform) */
+.tooltip-content {
+  background: var(--global-neutral-grey-90);
+  border: 1px solid var(--global-neutral-grey-70);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-md);
+  width: 373px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
+  /* Scale animation only on content, not positioning */
+  animation: tooltipFadeIn 0.2s ease;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    transform: scale(0.95);
+  }
+  to {
+    transform: scale(1);
+  }
+}

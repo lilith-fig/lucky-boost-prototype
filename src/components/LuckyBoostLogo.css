@@ -1,0 +1,13 @@
+.lucky-boost-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lucky-boost-logo img {
+  display: block;
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+}

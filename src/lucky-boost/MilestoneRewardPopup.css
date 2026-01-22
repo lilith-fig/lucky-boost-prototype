@@ -1,0 +1,113 @@
+.milestone-reward-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xl);
+  padding: var(--spacing-2xl);
+  text-align: center;
+}
+
+.milestone-reward-content.animating {
+  animation: rewardPulse 0.5s ease;
+}
+
+@keyframes rewardPulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.reward-icon {
+  animation: iconSpin 1s ease;
+}
+
+@keyframes iconSpin {
+  0% {
+    transform: rotate(0deg) scale(0);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.2);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+.reward-title {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  font-size: 24px;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.reward-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.reward-credits {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.currency-icon-large {
+  width: 48px;
+  height: 48px;
+  background: radial-gradient(circle, #ffd700 0%, #ffed4e 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--global-neutral-black);
+  font-weight: var(--font-weight-bold);
+  box-shadow: 0px 4px 12px rgba(255, 215, 0, 0.5);
+}
+
+.reward-amount {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  font-size: 32px;
+  color: var(--global-brand-primary-20);
+}
+
+.reward-label {
+  font-family: var(--font-family);
+  font-size: 16px;
+  color: var(--global-neutral-white);
+}
+
+.reward-guaranteed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.reward-min-value {
+  font-family: var(--font-family);
+  font-size: 14px;
+  color: var(--global-neutral-grey-30);
+}
+
+.reward-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  width: 100%;
+  max-width: 300px;
+}

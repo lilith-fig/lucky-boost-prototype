@@ -1,0 +1,125 @@
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #060606;
+}
+
+.app-header {
+  background: var(--global-neutral-grey-80);
+  border-bottom: 1px solid var(--global-neutral-grey-70);
+  padding: var(--spacing-lg) var(--spacing-2xl);
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.app-title {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  font-size: 24px;
+  color: var(--global-brand-primary-20);
+  margin: 0;
+}
+
+.app-main {
+  flex: 1;
+  padding: var(--spacing-2xl);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.demo-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xl);
+}
+
+.demo-section h2 {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  font-size: 20px;
+  color: var(--global-neutral-white);
+  margin: 0;
+}
+
+.demo-controls {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.demo-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  background: var(--global-neutral-grey-80);
+  border: 1px solid var(--global-neutral-grey-70);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.stat-label {
+  font-family: var(--font-family);
+  font-size: 12px;
+  color: var(--global-neutral-grey-30);
+  letter-spacing: -0.24px;
+}
+
+.stat-value {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  font-size: 18px;
+  color: var(--global-brand-primary-20);
+}
+
+.demo-info {
+  background: var(--global-neutral-grey-80);
+  border: 1px solid var(--global-neutral-grey-70);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+}
+
+.demo-info h3 {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  font-size: 16px;
+  color: var(--global-neutral-white);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.demo-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.demo-info li {
+  font-family: var(--font-family);
+  font-size: 14px;
+  color: var(--global-neutral-white);
+  padding-left: var(--spacing-lg);
+  position: relative;
+}
+
+.demo-info li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--global-brand-primary-20);
+}
