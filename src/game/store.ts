@@ -192,19 +192,24 @@ class GameStore {
   }
 
   // Sell card (add value to USDC balance)
-  sellCard(): void {
+  sellCard(options?: { stayOnReveal?: boolean }): void {
     if (this.state.lastResult) {
       this.state.usdcBalance += this.state.lastResult.card.value;
     }
-    
+
+    if (options?.stayOnReveal) {
+      // Stay on card reveal; do not navigate or clear lastResult (UI swaps to Flex / Pull another)
+      saveState(this.state);
+      this.notify();
+      return;
+    }
+
     if (this.state.luckyBoostProgress >= 100) {
       this.state.currentScreen = 'reward';
     } else {
-      // Navigate to pack detail page (preserve selectedPack)
       if (this.state.selectedPack) {
         this.state.currentScreen = 'packDetail';
       } else {
-        // Fallback to home if no pack selected
         this.state.currentScreen = 'home';
       }
       this.state.lastResult = null;

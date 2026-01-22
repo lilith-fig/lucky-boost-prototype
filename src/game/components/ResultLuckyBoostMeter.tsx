@@ -1,5 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Tooltip } from '../../design-system/Tooltip';
+import { CreditIcon } from '../../components/CreditIcon';
+import { getCurrentMilestone, MILESTONES, MAX_PROGRESS } from '../../lucky-boost/types';
 import './ResultLuckyBoostMeter.css';
 
 interface ResultLuckyBoostMeterProps {
@@ -12,6 +14,16 @@ interface ResultLuckyBoostMeterProps {
 
 export function ResultLuckyBoostMeter({ progress, previousProgress, progressAdded, isFull }: ResultLuckyBoostMeterProps) {
   const percentage = Math.min(100, Math.max(0, progress));
+
+  const nextReward = useMemo(() => {
+    if (isFull) return null;
+    const rawProgress = (percentage / 100) * MAX_PROGRESS;
+    const current = getCurrentMilestone(rawProgress);
+    const next = current
+      ? MILESTONES.find((m) => m.id === current.id + 1)
+      : MILESTONES[0];
+    return next ?? null;
+  }, [percentage, isFull]);
 
   useEffect(() => {
     if (isFull) {
@@ -76,6 +88,19 @@ export function ResultLuckyBoostMeter({ progress, previousProgress, progressAdde
             )}
           </div>
         </div>
+        {nextReward && (
+          <div className="result-meter-next-reward">
+            <span className="result-meter-next-reward-label">Next reward</span>
+            <CreditIcon size={14} />
+            <span className="result-meter-next-reward-amount">
+              {nextReward.reward.credits != null
+                ? `$${nextReward.reward.credits.toFixed(2)}`
+                : nextReward.reward.guaranteedPull != null
+                  ? `≥$${nextReward.reward.guaranteedPull.minValue.toFixed(2)}`
+                  : ''}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

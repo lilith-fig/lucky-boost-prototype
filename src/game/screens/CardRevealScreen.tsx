@@ -1,5 +1,6 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { gameStore } from '../store';
+import { toastStore } from '../../toastStore';
 import { ResultLuckyBoostMeter } from '../components/ResultLuckyBoostMeter';
 import { RewardModal } from '../components/RewardModal';
 import { Button } from '../../design-system/Button';
@@ -21,7 +22,34 @@ export function CardRevealScreen() {
   const [showRewardModal, setShowRewardModal] = useState(false);
   const [showKeepSell, setShowKeepSell] = useState(false);
   const [isSelling, setIsSelling] = useState(false);
+  const [hasSold, setHasSold] = useState(false);
+  const [tiltStyle, setTiltStyle] = useState<React.CSSProperties>({});
+  const [tiltEnabled, setTiltEnabled] = useState(false);
+  const cardRef = useRef<HTMLImageElement>(null);
+  const dismissTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const result = state.lastResult;
+
+  const handleCardMouseMove = (e: React.MouseEvent<HTMLImageElement>) => {
+    if (!tiltEnabled || !cardRef.current) return;
+    const card = cardRef.current;
+    const rect = card.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const mouseX = (e.clientX - centerX) / (rect.width / 2);
+    const mouseY = (e.clientY - centerY) / (rect.height / 2);
+    const tiltX = mouseY * 15;
+    const tiltY = mouseX * -15;
+    setTiltStyle({
+      transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
+    });
+  };
+
+  const handleCardMouseLeave = () => {
+    if (!tiltEnabled) return;
+    setTiltStyle({
+      transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg)',
+    });
+  };
 
   useEffect(() => {
     if (!result) {
@@ -89,9 +117,11 @@ export function CardRevealScreen() {
               setShowRewardModal(true);
             }, 1200);
           } else {
-            // Auto-dismiss meter after animation completes (actions already shown)
-            setTimeout(() => {
+            // Remain for 1s after animation ends, then dismiss (don't close right away)
+            if (dismissTimeoutRef.current) clearTimeout(dismissTimeoutRef.current);
+            dismissTimeoutRef.current = setTimeout(() => {
               setShowMeter(false);
+              dismissTimeoutRef.current = null;
             }, 1000);
           }
         }
@@ -104,8 +134,17 @@ export function CardRevealScreen() {
       clearTimeout(priceDelay);
       clearTimeout(actionsDelay);
       clearTimeout(meterDelay);
+      if (dismissTimeoutRef.current) {
+        clearTimeout(dismissTimeoutRef.current);
+        dismissTimeoutRef.current = null;
+      }
     };
   }, [result, state.luckyBoostProgress]);
+
+  useEffect(() => {
+    const enableTilt = setTimeout(() => setTiltEnabled(true), 600);
+    return () => clearTimeout(enableTilt);
+  }, []);
 
   const handleRewardClose = () => {
     setShowRewardModal(false);
@@ -125,6 +164,17 @@ export function CardRevealScreen() {
 
   return (
     <div className="card-reveal-screen">
+      {hasSold && (
+        <div className="card-reveal-pack-selection">
+          <Button
+            variant="secondary"
+            size="small"
+            onClick={() => gameStore.navigateTo('home')}
+          >
+            Pack selection
+          </Button>
+        </div>
+      )}
       {/* Background overlay with gradient */}
       <div className="result-background">
         <div className="result-overlay"></div>
@@ -135,9 +185,13 @@ export function CardRevealScreen() {
         <div className="card-container">
           {cardImageUrl ? (
             <img
+              ref={cardRef}
               src={cardImageUrl}
               alt={card.name}
               className="card-image"
+              style={tiltStyle}
+              onMouseMove={handleCardMouseMove}
+              onMouseLeave={handleCardMouseLeave}
             />
           ) : null}
           {showPrice && (
@@ -149,28 +203,66 @@ export function CardRevealScreen() {
 
         {showKeepSell && (
           <div className="card-reveal-actions">
-            <Button
-              variant="secondary"
-              size="large"
-              onClick={() => gameStore.keepCard()}
-            >
-              Keep
-            </Button>
-            <Button
-              variant="primary"
-              size="large"
-              onClick={() => {
-                setIsSelling(true);
-                // Wait 2 seconds before navigating
-                setTimeout(() => {
-                  gameStore.sellCard();
-                }, 2000);
-              }}
-              className={isSelling ? 'btn-loading' : ''}
-              disabled={isSelling}
-            >
-              {isSelling ? 'Selling...' : `Sell for ${formatCurrency(card.value)}`}
-            </Button>
+            {!hasSold ? (
+              <>
+                <Button
+                  variant="secondary"
+                  size="large"
+                  onClick={() => {
+                    toastStore.showToast('Card added to your inventory');
+                    gameStore.keepCard();
+                  }}
+                >
+                  Keep
+                </Button>
+                <Button
+                  variant="primary"
+                  size="large"
+                  onClick={() => {
+                    setIsSelling(true);
+                    setTimeout(() => {
+                      toastStore.showToast('Card sold successfully');
+                      gameStore.sellCard({ stayOnReveal: true });
+                      setIsSelling(false);
+                      setHasSold(true);
+                    }, 2000);
+                  }}
+                  className={isSelling ? 'btn-loading' : ''}
+                  disabled={isSelling}
+                >
+                  {isSelling ? 'Selling...' : `Sell for $${formatCurrency(card.value)}`}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="secondary"
+                  size="large"
+                  onClick={() => {}}
+                >
+                  Flex
+                </Button>
+                <Button
+                  variant="primary"
+                  size="large"
+                  onClick={() => {
+                    const pack = gameStore.getState().selectedPack;
+                    if (!pack) return;
+                    if (gameStore.getState().usdcBalance < pack.price) {
+                      alert('Insufficient USDC balance!');
+                      return;
+                    }
+                    gameStore.navigateTo('opening');
+                    setTimeout(() => {
+                      gameStore.openPack(pack.id, Date.now());
+                      gameStore.navigateTo('cardBack');
+                    }, 2000);
+                  }}
+                >
+                  Pull another
+                </Button>
+              </>
+            )}
           </div>
         )}
       </div>

@@ -7,6 +7,7 @@ import { PackOpeningScreen } from './game/screens/PackOpeningScreen';
 import { CardBackScreen } from './game/screens/CardBackScreen';
 import { CardRevealScreen } from './game/screens/CardRevealScreen';
 import { RewardPopup } from './game/screens/RewardPopup';
+import { Toast } from './design-system/Toast';
 import type { Screen } from './game/types';
 import './App.css';
 
@@ -52,6 +53,7 @@ function App() {
       <Header />
       {renderScreen()}
       {gameState.showRewardPopup && <RewardPopup />}
+      <Toast />
     </div>
   );
 }

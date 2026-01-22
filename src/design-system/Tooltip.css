@@ -31,7 +31,7 @@
 .tooltip-content {
   background: var(--global-neutral-grey-90);
   border: 1px solid var(--global-neutral-grey-70);
-  border-radius: var(--radius-sm);
+  border-radius: 8px;
   padding: 16px;
   width: 373px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);

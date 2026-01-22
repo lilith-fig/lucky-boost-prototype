@@ -12,6 +12,13 @@
   align-items: center;
 }
 
+.card-reveal-pack-selection {
+  position: fixed;
+  top: calc(64px + var(--spacing-xl));
+  left: var(--spacing-2xl);
+  z-index: 10;
+}
+
 /* Background with gradient overlay */
 .result-background {
   position: absolute;
@@ -90,6 +97,8 @@
   display: block;
   position: static;
   animation: cardElevate 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out;
 }
 
 .card-price {
