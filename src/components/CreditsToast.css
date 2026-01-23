@@ -1,0 +1,66 @@
+.credits-toast {
+  position: fixed;
+  top: 60px;
+  right: 24px;
+  z-index: 2000;
+  min-width: 200px;
+  background: var(--global-neutral-grey-80);
+  border: 1px solid var(--global-neutral-grey-70);
+  border-radius: var(--radius-md);
+  padding-top: 12px;
+  padding-bottom: 12px;
+  padding-left: var(--spacing-md);
+  padding-right: var(--spacing-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  animation: creditsToastSlideIn 0.25s ease;
+  pointer-events: none;
+  transform-origin: top right;
+}
+
+/* Match header container max-width positioning for larger screens */
+/* Header container has max-width: 1440px, margin: 0 auto, padding: 0 24px */
+/* Dropdown is at right: 0 relative to header-right, which is at the right edge of header-container */
+@media (min-width: 1488px) {
+  .credits-toast {
+    right: calc((100% - 1440px) / 2 + 24px);
+  }
+}
+
+@keyframes creditsToastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.credits-toast-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) 0;
+}
+
+.credits-toast-item-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.credits-toast-icon {
+  flex-shrink: 0;
+}
+
+.credits-toast-label {
+  font-size: 14px;
+  color: var(--global-neutral-grey-30);
+}
+
+.credits-toast-value {
+  font-size: 14px;
+  font-weight: var(--font-weight-bold);
+  color: var(--global-neutral-white);
+}

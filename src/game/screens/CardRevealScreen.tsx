@@ -9,6 +9,7 @@ import { formatCurrency } from '../../utils/formatCurrency';
 import { CountUpNumber } from '../../components/CountUpNumber';
 import { calculateProgress, getProgressPercentage } from '../../lucky-boost/types';
 import { luckyBoostStore } from '../../lucky-boost/store';
+import { useSFX } from '../../audio/useAudio';
 import './CardRevealScreen.css';
 
 export function CardRevealScreen() {
@@ -25,13 +26,20 @@ export function CardRevealScreen() {
   const [hasSold, setHasSold] = useState(false);
   const [hasKept, setHasKept] = useState(false);
   const [tiltStyle, setTiltStyle] = useState<React.CSSProperties>({});
+  const [glossStyle, setGlossStyle] = useState<React.CSSProperties>({});
   const [tiltEnabled, setTiltEnabled] = useState(false);
   const cardRef = useRef<HTMLImageElement>(null);
   const dismissTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cardRevealSoundPlayedRef = useRef<number | null>(null);
   const result = state.lastResult;
+  const sfx = useSFX();
 
-  const handleCardMouseMove = (e: React.MouseEvent<HTMLImageElement>) => {
+  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!tiltEnabled || !cardRef.current) return;
+    
+    // NOTE: No SFX should be played during hover/tilt interactions
+    // This handler only handles visual tilt and gloss effects
+    
     const card = cardRef.current;
     const rect = card.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
@@ -43,12 +51,32 @@ export function CardRevealScreen() {
     setTiltStyle({
       transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
     });
+    
+    // Calculate gloss angle based on tilt - mimics light reflection
+    // The gloss should move opposite to the tilt direction
+    const glossAngle = 160 + (tiltY * 0.5) + (tiltX * 0.3);
+    const glossX = 50 + (mouseX * 30);
+    const glossY = 50 + (mouseY * 30);
+    setGlossStyle({
+      background: `linear-gradient(${glossAngle}deg, rgba(217, 217, 217, 0.00) -0.53%, #F5FFE7 7.78%, rgba(217, 217, 217, 0.00) 23.15%, #D8F6FF 31.74%, rgba(231, 231, 231, 0.00) 42.74%, rgba(217, 217, 217, 0.00) 75.98%, #E8E5FF 81.55%, rgba(217, 217, 217, 0.00) 87.33%, rgba(252, 236, 255, 0.90) 91.46%, #D9D9D9 96.63%)`,
+      backgroundSize: '150% 150%',
+      backgroundPosition: `${glossX}% ${glossY}%`,
+    });
   };
 
   const handleCardMouseLeave = () => {
     if (!tiltEnabled) return;
+    
+    // NOTE: No SFX should be played during hover/tilt interactions
+    // This handler only resets visual tilt and gloss effects
+    
     setTiltStyle({
       transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg)',
+    });
+    setGlossStyle({
+      background: `linear-gradient(160deg, rgba(217, 217, 217, 0.00) -0.53%, #F5FFE7 7.78%, rgba(217, 217, 217, 0.00) 23.15%, #D8F6FF 31.74%, rgba(231, 231, 231, 0.00) 42.74%, rgba(217, 217, 217, 0.00) 75.98%, #E8E5FF 81.55%, rgba(217, 217, 217, 0.00) 87.33%, rgba(252, 236, 255, 0.90) 91.46%, #D9D9D9 96.63%)`,
+      backgroundSize: '150% 150%',
+      backgroundPosition: '50% 50%',
     });
   };
 
@@ -59,8 +87,17 @@ export function CardRevealScreen() {
     }
 
     // Only show meter and calculate progress if it's a loss (not a win)
-    // Wins (30% of packs) don't show meter UI
+    // Wins (20% of packs) don't show meter UI
     const isWin = result.isWin;
+
+    // Play card-reveal.mp3 when card is actually revealed (not in tap-to-reveal screen)
+    // Use ref to ensure it only plays once per card reveal, even if component re-renders due to hover/tilt
+    // Reset ref when result changes (new card revealed)
+    const resultId = result.timestamp; // Use timestamp as unique identifier for this card reveal
+    if (cardRevealSoundPlayedRef.current !== resultId) {
+      sfx.play('cardReveal');
+      cardRevealSoundPlayedRef.current = resultId;
+    }
 
     // Stage 1: Show price after card is revealed (800ms delay)
     const priceDelay = setTimeout(() => {
@@ -125,13 +162,20 @@ export function CardRevealScreen() {
               // Check if meter is full
               if (targetProgressValue >= 100) {
                 setIsMeterFull(true);
+                // Play meter full sound
+                sfx.play('meterFull');
                 // Show reward modal after light-up animation completes
                 setTimeout(() => {
                   // Clear the old reward popup to prevent duplicate popups
                   // The RewardModal in CardRevealScreen will be shown instead
                   gameStore.clearRewardPopup();
                   setShowRewardModal(true);
+                  // Play reward popup sound
+                  sfx.play('rewardPopup');
                 }, 1200);
+              } else {
+                // Play meter fill sound during animation
+                sfx.play('meterFill', { volume: 0.5 });
               }
               
               // Always remain for 2s after animation ends, then dismiss
@@ -163,7 +207,8 @@ export function CardRevealScreen() {
         clearTimeout(actionsDelay);
       };
     }
-  }, [result, state.luckyBoostProgress]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [result, state.luckyBoostProgress]); // sfx removed - using ref to ensure sound only plays once
 
   useEffect(() => {
     const enableTilt = setTimeout(() => setTiltEnabled(true), 600);
@@ -208,15 +253,23 @@ export function CardRevealScreen() {
       <div className="card-presentation">
         <div className="card-container">
           {cardImageUrl ? (
-            <img
-              ref={cardRef}
-              src={cardImageUrl}
-              alt={card.name}
-              className="card-image"
+            <div 
+              className="card-image-wrapper"
               style={tiltStyle}
               onMouseMove={handleCardMouseMove}
               onMouseLeave={handleCardMouseLeave}
-            />
+            >
+              <img
+                ref={cardRef}
+                src={cardImageUrl}
+                alt={card.name}
+                className="card-image"
+              />
+              <div 
+                className="card-gloss-layer"
+                style={glossStyle}
+              />
+            </div>
           ) : null}
           {showPrice && (
             <div className="card-price">
@@ -236,6 +289,8 @@ export function CardRevealScreen() {
                     toastStore.showToast('Card added to your inventory');
                     gameStore.keepCard({ stayOnReveal: true });
                     setHasKept(true);
+                    // Play card-kept.mp3 after clicking keep card
+                    sfx.play('keepCard');
                   }}
                 >
                   Keep
@@ -253,6 +308,8 @@ export function CardRevealScreen() {
                       gameStore.clearRewardPopup();
                       setIsSelling(false);
                       setHasSold(true);
+                      // Play card-sold.mp3 right after button loading state ends
+                      sfx.play('sellCard');
                       // Only show RewardModal if meter is full (100%)
                       if (isMeterFull) {
                         setShowRewardModal(true);
@@ -278,9 +335,11 @@ export function CardRevealScreen() {
                   variant="primary"
                   size="large"
                   onClick={() => {
+                    sfx.play('buttonClick');
                     const pack = gameStore.getState().selectedPack;
                     if (!pack) return;
                     if (gameStore.getState().usdcBalance < pack.price) {
+                      sfx.play('error');
                       alert('Insufficient USDC balance!');
                       return;
                     }

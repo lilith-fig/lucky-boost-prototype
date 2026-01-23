@@ -24,7 +24,6 @@ export function Header() {
     return unsubscribe;
   }, []);
 
-
   // USDC and Credits are separate
   const usdcBalance = state.usdcBalance;
   const creditsBalance = state.credits;
@@ -92,12 +91,11 @@ export function Header() {
             </div>
 
             {/* Balance Dropdown - shared by both balance and profile */}
-            {showBalanceDropdown && (
-              <div 
-                className="balance-dropdown"
-                onMouseEnter={() => setShowBalanceDropdown(true)}
-                onMouseLeave={() => setShowBalanceDropdown(false)}
-              >
+            <div 
+              className={`balance-dropdown ${showBalanceDropdown ? 'visible' : 'hidden'}`}
+              onMouseEnter={() => setShowBalanceDropdown(true)}
+              onMouseLeave={() => setShowBalanceDropdown(false)}
+            >
                 <div className="dropdown-item">
                   <div className="dropdown-item-left">
                     <CurrencyIcon size={14} className="dropdown-item-icon" />
@@ -131,8 +129,7 @@ export function Header() {
                     Top up 1K
                   </Button>
                 </div>
-              </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

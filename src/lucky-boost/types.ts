@@ -31,9 +31,22 @@ export interface LuckyBoostState {
 
 // Milestones are now based on dollar amounts
 // 100% = $1000 total losses
+// 5 variants of the first milestone, all with $25 reward
 export const MILESTONES: Milestone[] = [
-  { id: 1, start: 0, end: 1000, reward: { credits: 5 } },
+  { id: 1, start: 0, end: 1000, reward: { credits: 25 } },
+  { id: 2, start: 0, end: 1000, reward: { credits: 25 } },
+  { id: 3, start: 0, end: 1000, reward: { credits: 25 } },
+  { id: 4, start: 0, end: 1000, reward: { credits: 25 } },
+  { id: 5, start: 0, end: 1000, reward: { credits: 25 } },
 ];
+
+/**
+ * Get a random milestone variant (1-5) for the first milestone
+ * All variants have the same reward ($25), but this adds variety
+ */
+export function getRandomMilestoneVariant(): number {
+  return Math.floor(Math.random() * 5) + 1; // Returns 1-5
+}
 
 // Maximum progress for 100% meter ($1000 = 100%)
 export const MAX_PROGRESS = 1000;

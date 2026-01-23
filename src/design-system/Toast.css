@@ -1,6 +1,6 @@
 .toast {
   position: fixed;
-  top: calc(64px + var(--spacing-xl, 24px));
+  bottom: var(--spacing-2xl, 32px);
   right: var(--spacing-2xl, 32px);
   z-index: 2000;
   background: var(--global-neutral-grey-90);

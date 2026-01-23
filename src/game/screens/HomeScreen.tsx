@@ -2,11 +2,14 @@ import { PACKS } from '../packs';
 import { gameStore } from '../store';
 import { getPackImagePath } from '../utils/packImages';
 import { formatCurrency } from '../../utils/formatCurrency';
+import { useSFX } from '../../audio/useAudio';
 import './HomeScreen.css';
 
 export function HomeScreen() {
+  const sfx = useSFX();
 
   const handlePackClick = (packId: string) => {
+    sfx.play('buttonClick');
     const pack = PACKS.find(p => p.id === packId);
     if (pack) {
       gameStore.selectPack(pack);

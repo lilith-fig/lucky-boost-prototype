@@ -5,12 +5,66 @@ import { getPackImagePath } from '../utils/packImages';
 import { getRandomCardImageUrl } from '../utils/cardImages';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { PokeballIcon } from '../../components/PokeballIcon';
+import { useSFX } from '../../audio/useAudio';
 import './PackDetailScreen.css';
+
+function LatestDropCard({ card, packTheme, imageUrl }: { card?: any; packTheme: string; imageUrl?: string }) {
+  return (
+    <div className="latest-drop-card">
+      {imageUrl ? (
+        <div className="latest-drop-image-wrapper">
+          <img 
+            src={imageUrl} 
+            alt={card?.name || 'Card'}
+            className="latest-drop-image"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+            }}
+          />
+          <img 
+            src={imageUrl} 
+            alt=""
+            className="latest-drop-image-reflection"
+            aria-hidden="true"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+            }}
+          />
+        </div>
+      ) : (
+        <div className="latest-drop-placeholder">
+          <img 
+            src={getRandomCardImageUrl(packTheme as any)} 
+            alt="Card placeholder"
+            className="latest-drop-image"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+            }}
+          />
+          <img 
+            src={getRandomCardImageUrl(packTheme as any)} 
+            alt=""
+            className="latest-drop-image-reflection"
+            aria-hidden="true"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function PackDetailScreen() {
   const state = gameStore.getState();
   const pack = state.selectedPack;
   const [showOdds, setShowOdds] = useState(false);
+  const sfx = useSFX();
 
   if (!pack) {
     gameStore.navigateTo('home');
@@ -18,14 +72,17 @@ export function PackDetailScreen() {
   }
 
   const handleBack = () => {
+    sfx.play('navigation');
     gameStore.navigateTo('home');
   };
 
   const handleOpenPack = () => {
     if (state.usdcBalance < pack.price) {
+      sfx.play('error');
       alert('Insufficient USDC balance!');
       return;
     }
+    sfx.play('buttonClick');
     gameStore.navigateTo('opening');
     // Open pack after opening animation (2s shake) finishes
     setTimeout(() => {
@@ -103,53 +160,12 @@ export function PackDetailScreen() {
                     .slice(-6)
                     .reverse()
                     .map((card) => (
-                      <div key={card.id} className="latest-drop-card">
-                        {card.imageUrl ? (
-                          <div className="latest-drop-image-wrapper">
-                            <img 
-                              src={card.imageUrl} 
-                              alt={card.name}
-                              className="latest-drop-image"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                              }}
-                            />
-                            <img 
-                              src={card.imageUrl} 
-                              alt=""
-                              className="latest-drop-image-reflection"
-                              aria-hidden="true"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          <div className="latest-drop-placeholder">
-                            <img 
-                              src={getRandomCardImageUrl(pack.theme)} 
-                              alt="Card placeholder"
-                              className="latest-drop-image"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                              }}
-                            />
-                            <img 
-                              src={getRandomCardImageUrl(pack.theme)} 
-                              alt=""
-                              className="latest-drop-image-reflection"
-                              aria-hidden="true"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                              }}
-                            />
-                          </div>
-                        )}
-                      </div>
+                      <LatestDropCard 
+                        key={card.id} 
+                        card={card}
+                        packTheme={pack.theme}
+                        imageUrl={card.imageUrl}
+                      />
                     ))
                 ) : (
                   <div className="latest-drops-empty">

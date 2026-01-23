@@ -183,7 +183,7 @@ class LuckyBoostStore {
     };
 
     const packPrice = 10 + Math.floor(rng(seed) * 20); // $10-$30
-    const isWin = rng(seed + 1) > 0.7; // 30% win rate
+    const isWin = rng(seed + 1) > 0.85; // 15% win rate
     const cardValue = isWin
       ? packPrice + Math.floor(rng(seed + 2) * 50) // Win: pack price to pack price + $50
       : Math.floor(rng(seed + 2) * packPrice * 0.8); // Loss: 0 to 80% of pack price

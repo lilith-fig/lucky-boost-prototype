@@ -175,6 +175,7 @@
   width: 100%;
   height: 80px;
   overflow: hidden;
+  border-radius: 2px;
 }
 
 .latest-drop-image {
@@ -214,6 +215,7 @@
 }
 
 .latest-drop-placeholder {
+  position: relative;
   width: 48px;
   height: 87px;
   display: flex;
@@ -221,10 +223,28 @@
   align-items: center;
   justify-content: flex-start;
   gap: 2px;
-  border-radius: 0;
+  border-radius: 2px;
   background: unset;
   border: 0 none transparent;
   box-sizing: content-box;
+  overflow: hidden;
+}
+
+.latest-drop-gloss-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.33;
+  background: linear-gradient(160deg, rgba(217, 217, 217, 0.00) -0.53%, #F5FFE7 7.78%, rgba(217, 217, 217, 0.00) 23.15%, #D8F6FF 31.74%, rgba(231, 231, 231, 0.00) 42.74%, rgba(217, 217, 217, 0.00) 75.98%, #E8E5FF 81.55%, rgba(217, 217, 217, 0.00) 87.33%, rgba(252, 236, 255, 0.90) 91.46%, #D9D9D9 96.63%);
+  background-size: 150% 150%;
+  background-position: 50% 50%;
+  mix-blend-mode: plus-lighter;
+  pointer-events: none;
+  border-radius: 2px;
+  transition: background 0.1s ease-out, background-position 0.1s ease-out, background-size 0.1s ease-out;
+  z-index: 2;
 }
 
 .latest-drop-rarity {

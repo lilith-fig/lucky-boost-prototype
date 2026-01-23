@@ -169,14 +169,16 @@ export const LuckyBoostModal: React.FC<LuckyBoostModalProps> = ({
           <h4>Progress Formula</h4>
           <div className="formula-box">
             <p>
-              <strong>Base progress:</strong> 6 (every pack open)
+              <strong>Progress for losses:</strong> pack price - card value (in dollars)
             </p>
             <p>
-              <strong>Loss bonus:</strong> floor((packPrice - cardValue) / packPrice ×
-              40), capped at 40
+              <strong>Progress for wins:</strong> 0 (wins don't add progress)
             </p>
             <p>
-              <strong>Total:</strong> base + lossBonus (if loss) or just base (if win)
+              <strong>Meter:</strong> $1000 = 100% (full meter)
+            </p>
+            <p>
+              <strong>Example:</strong> Opening a $25 pack and getting a $10 card adds $15 to your progress
             </p>
           </div>
           <h4>Win/Loss Determination</h4>

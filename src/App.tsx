@@ -8,6 +8,8 @@ import { CardBackScreen } from './game/screens/CardBackScreen';
 import { CardRevealScreen } from './game/screens/CardRevealScreen';
 import { RewardPopup } from './game/screens/RewardPopup';
 import { Toast } from './design-system/Toast';
+import { CreditsToast } from './components/CreditsToast';
+import { AudioManager } from './components/AudioManager';
 import type { Screen } from './game/types';
 import './App.css';
 
@@ -50,10 +52,12 @@ function App() {
 
   return (
     <div className="app">
+      <AudioManager />
       <Header />
       {renderScreen()}
       {gameState.showRewardPopup && <RewardPopup />}
       <Toast />
+      <CreditsToast />
     </div>
   );
 }

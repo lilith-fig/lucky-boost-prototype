@@ -40,10 +40,13 @@ export interface GameState {
   lastResult: PackOpenResult | null;
   showRewardPopup: boolean;
   inventory: Card[]; // Collection of kept cards
+  showCreditsDropdown?: boolean; // Show credits dropdown when credits are awarded
+  creditsStartBalance?: number; // Starting balance for count-up animation
   pendingLuckyBoostUpdate?: {
     packPrice: number;
     cardValue: number;
     milestonesReached: number[];
+    selectedMilestoneVariant?: number; // The randomly selected milestone variant ID (1-5)
   };
 }
 

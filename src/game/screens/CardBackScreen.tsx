@@ -4,17 +4,21 @@ import './CardBackScreen.css';
 
 export function CardBackScreen() {
   const [tiltStyle, setTiltStyle] = useState<React.CSSProperties>({});
+  const [glossStyle, setGlossStyle] = useState<React.CSSProperties>({});
   const cardRef = useRef<HTMLImageElement>(null);
   const state = gameStore.getState();
   const theme = state.selectedPack?.theme ?? 'pokemon';
 
   const handleCardClick = () => {
-    // Navigate directly to card reveal
+    // Navigate directly to card reveal (card-reveal.mp3 will play in CardRevealScreen)
     gameStore.navigateTo('cardReveal');
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLImageElement>) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
+
+    // NOTE: No SFX should be played during hover/tilt interactions
+    // This handler only handles visual tilt and gloss effects
 
     const card = cardRef.current;
     const rect = card.getBoundingClientRect();
@@ -33,12 +37,30 @@ export function CardBackScreen() {
     setTiltStyle({
       transform: `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
     });
+    
+    // Calculate gloss angle based on tilt - mimics light reflection
+    const glossAngle = 160 + (tiltY * 0.5) + (tiltX * 0.3);
+    const glossX = 50 + (mouseX * 30);
+    const glossY = 50 + (mouseY * 30);
+    setGlossStyle({
+      background: `linear-gradient(${glossAngle}deg, rgba(217, 217, 217, 0.00) -0.53%, #F5FFE7 7.78%, rgba(217, 217, 217, 0.00) 23.15%, #D8F6FF 31.74%, rgba(231, 231, 231, 0.00) 42.74%, rgba(217, 217, 217, 0.00) 75.98%, #E8E5FF 81.55%, rgba(217, 217, 217, 0.00) 87.33%, rgba(252, 236, 255, 0.90) 91.46%, #D9D9D9 96.63%)`,
+      backgroundSize: '150% 150%',
+      backgroundPosition: `${glossX}% ${glossY}%`,
+    });
   };
 
   const handleMouseLeave = () => {
+    // NOTE: No SFX should be played during hover/tilt interactions
+    // This handler only resets visual tilt and gloss effects
+    
     // Reset tilt when mouse leaves
     setTiltStyle({
       transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg)',
+    });
+    setGlossStyle({
+      background: `linear-gradient(160deg, rgba(217, 217, 217, 0.00) -0.53%, #F5FFE7 7.78%, rgba(217, 217, 217, 0.00) 23.15%, #D8F6FF 31.74%, rgba(231, 231, 231, 0.00) 42.74%, rgba(217, 217, 217, 0.00) 75.98%, #E8E5FF 81.55%, rgba(217, 217, 217, 0.00) 87.33%, rgba(252, 236, 255, 0.90) 91.46%, #D9D9D9 96.63%)`,
+      backgroundSize: '150% 150%',
+      backgroundPosition: '50% 50%',
     });
   };
 
@@ -48,16 +70,24 @@ export function CardBackScreen() {
   return (
     <div className="card-back-screen">
       <div className="card-container">
-        <img 
-          ref={cardRef}
-          src={cardBackImage} 
-          alt="Card back" 
-          className="card-back-image"
+        <div 
+          className="card-back-image-wrapper"
           style={tiltStyle}
           onClick={handleCardClick}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-        />
+        >
+          <img 
+            ref={cardRef}
+            src={cardBackImage} 
+            alt="Card back" 
+            className="card-back-image"
+          />
+          <div 
+            className="card-gloss-layer"
+            style={glossStyle}
+          />
+        </div>
         <p className="card-back-hint">Tap to reveal</p>
       </div>
     </div>
