@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { gameStore } from '../game/store';
 import { CreditIcon } from './CreditIcon';
-import { CountUpNumber } from './CountUpNumber';
 import './CreditsToast.css';
 
 export function CreditsToast() {
@@ -21,7 +20,7 @@ export function CreditsToast() {
     }
   }
   
-  const [state, setState] = useState(gameStore.getState());
+  const [_state, setState] = useState(gameStore.getState());
   const [isVisible, setIsVisible] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previousShowFlagRef = useRef<boolean>(false);
@@ -148,9 +147,9 @@ export function CreditsToast() {
         </div>
         <div className="credits-toast-value">
           <CountUpNumberWithStart 
-            key={`${state.creditsStartBalance}-${state.credits}`}
-            startValue={state.creditsStartBalance}
-            endValue={state.credits} 
+            key={`${currentStoreState.creditsStartBalance}-${currentStoreState.credits}`}
+            startValue={currentStoreState.creditsStartBalance!}
+            endValue={currentStoreState.credits} 
             duration={800}
           />
         </div>

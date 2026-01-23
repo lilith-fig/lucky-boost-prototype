@@ -1,5 +1,5 @@
 import { audioStore } from './audioStore';
-import type { SoundEffect, AudioManager } from './types';
+import type { SoundEffect, AudioManager, AudioState } from './types';
 
 // Map sound effects to their file paths
 const SFX_PATHS: Record<SoundEffect, string> = {
