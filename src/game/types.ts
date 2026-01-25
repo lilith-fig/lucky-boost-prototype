@@ -42,6 +42,9 @@ export interface GameState {
   inventory: Card[]; // Collection of kept cards
   showCreditsDropdown?: boolean; // Show credits dropdown when credits are awarded
   creditsStartBalance?: number; // Starting balance for count-up animation
+  rewardClaimed?: boolean; // Track if the current milestone reward has been claimed
+  nextRewardVariantId?: number; // Pre-calculated next reward (1-10); shown in UI, used when milestone reached
+  claimedRewardVariantId?: number; // Milestone just reached; shown in claim modal until user clicks Claim
   pendingLuckyBoostUpdate?: {
     packPrice: number;
     cardValue: number;

@@ -23,7 +23,9 @@ export function CreditsToast() {
   const [_state, setState] = useState(gameStore.getState());
   const [isVisible, setIsVisible] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dismissTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previousShowFlagRef = useRef<boolean>(false);
+  const animationCompleteRef = useRef<boolean>(false);
 
   useEffect(() => {
     const unsubscribe = gameStore.subscribe(() => {
@@ -75,22 +77,32 @@ export function CreditsToast() {
         // Only show if we're not already visible (prevent re-triggering)
         setIsVisible(true);
         setState(newState);
+        animationCompleteRef.current = false;
 
-        // Calculate duration: 800ms for count-up + 500ms to stay = 1300ms total
+        // Clear any existing dismiss timeout
+        if (dismissTimeoutRef.current) {
+          clearTimeout(dismissTimeoutRef.current);
+          dismissTimeoutRef.current = null;
+        }
+
+        // Set initial timeout (will be cleared when animation completes)
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
         }
         timeoutRef.current = setTimeout(() => {
-          setIsVisible(false);
-          gameStore.clearCreditsDropdown();
-          previousShowFlagRef.current = false;
-        }, 1300);
+          // This timeout is a fallback, but animation completion will handle dismissal
+        }, 2000);
       } else if (!shouldShow && isVisible) {
         // If conditions are no longer met, hide immediately
         setIsVisible(false);
+        animationCompleteRef.current = false;
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
           timeoutRef.current = null;
+        }
+        if (dismissTimeoutRef.current) {
+          clearTimeout(dismissTimeoutRef.current);
+          dismissTimeoutRef.current = null;
         }
       }
       
@@ -106,8 +118,25 @@ export function CreditsToast() {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      if (dismissTimeoutRef.current) {
+        clearTimeout(dismissTimeoutRef.current);
+      }
     };
   }, [isVisible]);
+
+  // Handler for when count-up animation completes
+  const handleAnimationComplete = () => {
+    if (!animationCompleteRef.current) {
+      animationCompleteRef.current = true;
+      // Dismiss toast 1 second after animation completes
+      dismissTimeoutRef.current = setTimeout(() => {
+        setIsVisible(false);
+        gameStore.clearCreditsDropdown();
+        previousShowFlagRef.current = false;
+        dismissTimeoutRef.current = null;
+      }, 1000);
+    }
+  };
 
   // ABSOLUTE GUARD: Check current store state (not component state) to prevent stale renders
   // This is the final safety check to prevent "0 → 0" or any invalid displays
@@ -151,6 +180,7 @@ export function CreditsToast() {
             startValue={currentStoreState.creditsStartBalance!}
             endValue={currentStoreState.credits} 
             duration={800}
+            onComplete={handleAnimationComplete}
           />
         </div>
       </div>
@@ -162,11 +192,13 @@ export function CreditsToast() {
 function CountUpNumberWithStart({ 
   startValue, 
   endValue, 
-  duration 
+  duration,
+  onComplete
 }: { 
   startValue: number; 
   endValue: number; 
   duration: number;
+  onComplete?: () => void;
 }) {
   const [displayValue, setDisplayValue] = useState(startValue);
   const animationFrameRef = useRef<number | null>(null);
@@ -183,6 +215,10 @@ function CountUpNumberWithStart({
     if (startValue === endValue) {
       setDisplayValue(endValue);
       isAnimatingRef.current = false;
+      // Still call onComplete even if no animation needed
+      if (onComplete) {
+        onComplete();
+      }
       return;
     }
 
@@ -209,6 +245,10 @@ function CountUpNumberWithStart({
         setDisplayValue(endValue);
         isAnimatingRef.current = false;
         animationFrameRef.current = null;
+        // Call onComplete callback when animation finishes
+        if (onComplete) {
+          onComplete();
+        }
       }
     };
 
@@ -221,7 +261,7 @@ function CountUpNumberWithStart({
       }
       isAnimatingRef.current = false;
     };
-  }, [startValue, endValue, duration]);
+  }, [startValue, endValue, duration, onComplete]);
 
   const formattedValue = new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 2,

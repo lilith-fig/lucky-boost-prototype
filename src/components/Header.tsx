@@ -7,6 +7,7 @@ import { CurrencyIcon } from './CurrencyIcon';
 import { CreditIcon } from './CreditIcon';
 import { Button } from '../design-system/Button';
 import { CountUpNumber } from './CountUpNumber';
+import { TestButton } from './TestButton';
 import './Header.css';
 
 export function Header() {
@@ -36,6 +37,7 @@ export function Header() {
         </div>
         
         <div className="header-right">
+          <TestButton />
           {/* Lucky Boost - compact passive indicator */}
           <LuckyBoostHeaderMeter progress={luckyBoostState.currentProgress} />
           

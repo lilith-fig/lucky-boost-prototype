@@ -55,7 +55,7 @@ function App() {
       <AudioManager />
       <Header />
       {renderScreen()}
-      {gameState.showRewardPopup && <RewardPopup />}
+      {gameState.showRewardPopup && !gameState.rewardClaimed && <RewardPopup />}
       <Toast />
       <CreditsToast />
     </div>

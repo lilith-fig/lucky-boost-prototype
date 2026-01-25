@@ -1,0 +1,205 @@
+.test-panel {
+  position: absolute;
+  top: 378px;
+  left: 0px;
+  transform: translateY(-50%);
+  width: 264px;
+  max-width: calc(90vw - var(--spacing-lg) * 2);
+  max-height: 90vh;
+  background: var(--global-neutral-grey-90);
+  border: 1px solid var(--global-neutral-grey-80);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  animation: slideInLeft 0.3s ease;
+  overflow: hidden;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateY(-50%) translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(-50%) translateX(0);
+    opacity: 1;
+  }
+}
+
+.test-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--global-neutral-grey-80);
+  position: sticky;
+  top: 0;
+  background: var(--global-neutral-grey-90);
+  z-index: 1;
+}
+
+.test-panel-header h2 {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  font-size: 18px;
+  color: rgba(255, 255, 255, 1);
+  margin: 0;
+}
+
+.test-panel-close {
+  background: transparent;
+  border: none;
+  color: var(--global-neutral-white);
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  transition: background 0.2s ease;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.test-panel-close:hover {
+  background: var(--global-neutral-grey-80);
+}
+
+.test-panel-content {
+  flex: 1;
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.test-panel-content::-webkit-scrollbar {
+  display: none;
+}
+
+.test-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.test-section h3 {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  font-size: 14px;
+  color: var(--global-neutral-white);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.test-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.test-control-group label {
+  font-family: var(--font-family);
+  font-size: 12px;
+  color: var(--global-neutral-grey-30);
+}
+
+.test-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: var(--radius-sm);
+  background: var(--global-neutral-grey-80);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.test-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--global-brand-primary-20);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.test-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+.test-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--global-brand-primary-20);
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s ease;
+}
+
+.test-slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+}
+
+.test-select {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--global-neutral-grey-80);
+  border: 1px solid var(--global-neutral-grey-70);
+  border-radius: var(--radius-md);
+  color: var(--global-neutral-white);
+  font-family: var(--font-family);
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.test-select:hover {
+  border-color: var(--global-neutral-grey-60);
+}
+
+.test-select:focus {
+  border-color: var(--global-brand-primary-20);
+}
+
+.test-button-group {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.test-telemetry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--global-neutral-grey-80);
+  border-radius: var(--radius-md);
+}
+
+.test-telemetry-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.test-telemetry-label {
+  color: var(--global-neutral-grey-30);
+}
+
+.test-telemetry-value {
+  color: var(--global-brand-primary-20);
+  font-weight: var(--font-weight-bold);
+}

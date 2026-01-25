@@ -195,6 +195,35 @@ class LuckyBoostStore {
       cardValue,
     };
   }
+
+  // TEST ONLY: Directly set progress (for testing/prototyping)
+  // This method is isolated from production logic and should only be used in test mode
+  setTestProgress(progressDollars: number): void {
+    // Clamp progress to valid range
+    const clampedProgress = Math.max(0, Math.min(MAX_PROGRESS, progressDollars));
+    
+    // Determine which milestone we're in
+    let milestoneIndex = 0;
+    for (let i = 0; i < MILESTONES.length; i++) {
+      if (clampedProgress >= MILESTONES[i].start && clampedProgress < MILESTONES[i].end) {
+        milestoneIndex = i;
+        break;
+      }
+      // If past all milestones, stay at last milestone
+      if (i === MILESTONES.length - 1 && clampedProgress >= MILESTONES[i].end) {
+        milestoneIndex = i;
+      }
+    }
+
+    this.state = {
+      ...this.state,
+      currentProgress: clampedProgress,
+      currentMilestoneIndex: milestoneIndex,
+    };
+
+    saveState(this.state);
+    this.notify();
+  }
 }
 
 export const luckyBoostStore = new LuckyBoostStore();

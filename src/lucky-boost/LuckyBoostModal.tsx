@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from '../design-system/Modal';
 import { Tabs } from '../design-system/Tabs';
 import { Progress } from '../design-system/Progress';
@@ -12,6 +12,7 @@ import {
 } from './types';
 import { formatCurrency } from '../utils/formatCurrency';
 import { CreditIcon } from '../components/CreditIcon';
+import { gameStore } from '../game/store';
 import './LuckyBoostModal.css';
 
 interface LuckyBoostModalProps {
@@ -25,11 +26,20 @@ export const LuckyBoostModal: React.FC<LuckyBoostModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState('next-prize');
   const state = useLuckyBoost();
+  const [gameState, setGameState] = useState(gameStore.getState());
   const percentage = getProgressPercentage(state.currentProgress);
   const currentMilestone = getCurrentMilestone(state.currentProgress);
-  const nextMilestone = currentMilestone
-    ? MILESTONES.find((m) => m.id === currentMilestone.id + 1)
-    : MILESTONES[0];
+  
+  useEffect(() => {
+    const unsubscribe = gameStore.subscribe(() => {
+      setGameState(gameStore.getState());
+    });
+    return unsubscribe;
+  }, []);
+  
+  // Pre-calculated next reward (exact amount, never a range)
+  const nextRewardVariantId = gameState.nextRewardVariantId ?? 1;
+  const nextRewardAmount = MILESTONES.find(m => m.id === nextRewardVariantId)?.reward.credits ?? 25;
 
 
   const upcomingMilestones = MILESTONES.filter(
@@ -67,15 +77,11 @@ export const LuckyBoostModal: React.FC<LuckyBoostModalProps> = ({
               <Progress value={percentage} max={100} />
               <div className="progress-info">
                 <span className="progress-percentage">{Math.round(percentage)}%</span>
-                {nextMilestone && (
+                {percentage < 100 && (
                   <div className="next-reward">
                     <span>Next reward</span>
                     <CreditIcon size={14} />
-                    <span>
-                      {nextMilestone.reward.credits
-                        ? `$${nextMilestone.reward.credits.toFixed(2)}`
-                        : `≥$${nextMilestone.reward.guaranteedPull?.minValue.toFixed(2)}`}
-                    </span>
+                    <span>${nextRewardAmount.toFixed(2)}</span>
                   </div>
                 )}
               </div>

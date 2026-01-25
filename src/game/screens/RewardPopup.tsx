@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { gameStore } from '../store';
 import { Modal } from '../../design-system/Modal';
 import { Button } from '../../design-system/Button';
@@ -6,9 +7,16 @@ import { MILESTONES } from '../../lucky-boost/types';
 import './RewardPopup.css';
 
 export function RewardPopup() {
-  const state = gameStore.getState();
+  const [gameState, setGameState] = useState(() => gameStore.getState());
 
-  if (!state.showRewardPopup) {
+  useEffect(() => {
+    const unsubscribe = gameStore.subscribe(() => {
+      setGameState(gameStore.getState());
+    });
+    return unsubscribe;
+  }, []);
+
+  if (!gameState.showRewardPopup) {
     return null;
   }
 
@@ -16,9 +24,13 @@ export function RewardPopup() {
     gameStore.claimReward('credits');
   };
 
-  // Get the reward amount from the milestone (any variant 1-5, all have $25)
-  const milestone = MILESTONES.find(m => m.id === 1);
-  const rewardAmount = milestone?.reward.credits || 25; // Default to $25
+  // Show current reward (milestone just claimed), not next reward
+  const claimedVariantId = gameState.claimedRewardVariantId ??
+                           gameState.pendingLuckyBoostUpdate?.selectedMilestoneVariant ??
+                           gameState.pendingLuckyBoostUpdate?.milestonesReached?.[0] ??
+                           1;
+  const milestone = MILESTONES.find(m => m.id === claimedVariantId);
+  const rewardAmount = milestone?.reward.credits ?? 25; // Default to $25 if not found
 
   return (
     <Modal isOpen={true} onClose={() => {}}>

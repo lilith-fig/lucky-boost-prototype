@@ -1,0 +1,58 @@
+.test-button-container {
+  position: static;
+  width: 40px;
+  height: 40px;
+  z-index: 998;
+}
+
+.test-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
+  background: transparent;
+  border: 1px solid var(--global-neutral-grey-70);
+  border-radius: var(--radius-md);
+  color: var(--global-neutral-white);
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.test-button:hover:not(:disabled) {
+  border-radius: 8px;
+  border: 1px solid var(--global-neutral-grey-70);
+  background: var(--global-neutral-grey-90);
+  color: var(--global-neutral-white);
+}
+
+.test-button-active {
+  background: var(--global-neutral-grey-90);
+  border-color: var(--global-neutral-grey-70);
+}
+
+.test-button-active:hover:not(:disabled) {
+  background: var(--global-neutral-grey-80);
+}
+
+.test-button-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  font-size: inherit;
+  line-height: 1;
+}
+
+.test-button-label {
+  font-weight: var(--font-weight-regular);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

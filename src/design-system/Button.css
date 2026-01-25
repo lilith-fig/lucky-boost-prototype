@@ -124,18 +124,17 @@
 
 /* Destructive Variant - Red with glossy effect */
 .btn-destructive {
-  background: linear-gradient(180deg, #ff3333 0%, #cc0000 100%);
-  border: 3px solid rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border: 3px solid #BA0300;
+  background: var(--global-red, #FF1E1A);
   color: var(--global-neutral-white);
-  box-shadow: inset 0px 1px 0px 0px rgba(255, 255, 255, 0.2), 
-              inset 0px -1px 0px 0px rgba(0, 0, 0, 0.3);
 }
 
 .btn-destructive:hover:not(:disabled) {
-  border-color: #D3F015;
-  background: #D3F015;
-  color: var(--global-neutral-black);
-  box-shadow: 5px 5px 0 0 rgba(255, 255, 255, 0.70) inset;
+  border-radius: 8px;
+  border: 3px solid #920200;
+  background: #BA0300;
+  color: var(--global-neutral-white);
 }
 
 .btn-destructive:disabled {

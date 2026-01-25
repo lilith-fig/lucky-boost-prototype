@@ -1,7 +1,8 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Tooltip } from '../../design-system/Tooltip';
 import { CreditIcon } from '../../components/CreditIcon';
-import { getCurrentMilestone, MILESTONES, MAX_PROGRESS, getProgressPercentage } from '../../lucky-boost/types';
+import { MILESTONES, getProgressPercentage } from '../../lucky-boost/types';
+import { gameStore } from '../store';
 import './ResultLuckyBoostMeter.css';
 
 interface ResultLuckyBoostMeterProps {
@@ -14,16 +15,20 @@ interface ResultLuckyBoostMeterProps {
 
 export function ResultLuckyBoostMeter({ progress, previousProgress, progressAdded, isFull }: ResultLuckyBoostMeterProps) {
   const percentage = Math.min(100, Math.max(0, progress));
+  const [gameState, setGameState] = useState(() => gameStore.getState());
 
-  const nextReward = useMemo(() => {
+  useEffect(() => {
+    const unsub = gameStore.subscribe(() => setGameState(gameStore.getState()));
+    return unsub;
+  }, []);
+
+  // Use pre-calculated next reward (synced with header/dropdown) – exact amount, never stale
+  const nextRewardAmount = useMemo(() => {
     if (isFull) return null;
-    const rawProgress = (percentage / 100) * MAX_PROGRESS;
-    const current = getCurrentMilestone(rawProgress);
-    const next = current
-      ? MILESTONES.find((m) => m.id === current.id + 1)
-      : MILESTONES[0];
-    return next ?? null;
-  }, [percentage, isFull]);
+    const variantId = gameState.pendingLuckyBoostUpdate?.selectedMilestoneVariant ?? gameState.nextRewardVariantId ?? 1;
+    const milestone = MILESTONES.find((m) => m.id === variantId);
+    return milestone?.reward.credits ?? 25;
+  }, [isFull, gameState.pendingLuckyBoostUpdate?.selectedMilestoneVariant, gameState.nextRewardVariantId]);
 
   useEffect(() => {
     if (isFull) {
@@ -63,16 +68,12 @@ export function ResultLuckyBoostMeter({ progress, previousProgress, progressAdde
             alt="Lucky Boost" 
             className="result-meter-logo"
           />
-          {nextReward && (
+          {nextRewardAmount != null && (
             <div className="result-meter-next-reward">
               <span className="result-meter-next-reward-label">Next reward</span>
               <CreditIcon size={14} />
               <span className="result-meter-next-reward-amount">
-                {nextReward.reward.credits != null
-                  ? `$${nextReward.reward.credits.toFixed(2)}`
-                  : nextReward.reward.guaranteedPull != null
-                    ? `≥$${nextReward.reward.guaranteedPull.minValue.toFixed(2)}`
-                    : ''}
+                ${nextRewardAmount.toFixed(2)}
               </span>
             </div>
           )}

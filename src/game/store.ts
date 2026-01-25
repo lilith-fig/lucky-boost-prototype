@@ -15,6 +15,7 @@ const defaultState: GameState = {
   lastResult: null,
   showRewardPopup: false,
   inventory: [], // Collection of kept cards
+  rewardClaimed: false,
 };
 
 function loadState(): GameState {
@@ -32,20 +33,24 @@ function loadState(): GameState {
       // Clear credits toast state on load - it should only show when explicitly triggered
       loadedState.showCreditsDropdown = false;
       loadedState.creditsStartBalance = undefined;
+      // Pre-calculate next reward if missing (e.g. migration)
+      if (loadedState.nextRewardVariantId == null || loadedState.nextRewardVariantId < 1 || loadedState.nextRewardVariantId > 10) {
+        loadedState.nextRewardVariantId = getRandomMilestoneVariant();
+      }
       return loadedState;
     }
   } catch (e) {
     console.error('Failed to load game state:', e);
   }
-  return defaultState;
+  const state = { ...defaultState };
+  state.nextRewardVariantId = getRandomMilestoneVariant();
+  return state;
 }
 
 function saveState(state: GameState): void {
   try {
-    // Don't save currentScreen, usdcBalance, showCreditsDropdown, or creditsStartBalance to localStorage
-    // Balance resets each session, so we don't persist it
-    // Credits toast state should not persist - it should only show when explicitly triggered
-    const { currentScreen, usdcBalance, showCreditsDropdown, creditsStartBalance, ...stateToSave } = state;
+    // Don't save currentScreen, usdcBalance, showCreditsDropdown, creditsStartBalance, or claimedRewardVariantId
+    const { currentScreen, usdcBalance, showCreditsDropdown, creditsStartBalance, claimedRewardVariantId, ...stateToSave } = state;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
   } catch (e) {
     console.error('Failed to save game state:', e);
@@ -64,6 +69,11 @@ class GameStore {
     // It should only be set when user explicitly clicks "Claim" after meter fills
     this.state.showCreditsDropdown = false;
     this.state.creditsStartBalance = undefined;
+    
+    // Pre-calculate next reward if missing
+    if (this.state.nextRewardVariantId == null || this.state.nextRewardVariantId < 1 || this.state.nextRewardVariantId > 10) {
+      this.state.nextRewardVariantId = getRandomMilestoneVariant();
+    }
     
     // Reset balance when user leaves the session (beforeunload)
     if (typeof window !== 'undefined') {
@@ -158,6 +168,7 @@ class GameStore {
     // Clear any previous reward popup state when opening a new pack
     // This ensures we don't show the popup incorrectly
     this.state.showRewardPopup = false;
+    this.state.rewardClaimed = false;
     
     // ALWAYS clear credits toast state when opening a new pack
     // This prevents the toast from showing randomly when meter bar hasn't loaded
@@ -183,8 +194,8 @@ class GameStore {
         // Only mark as reached if we're NOT already at/past the milestone
         // This prevents showing popup again if progress wasn't properly reset
         if (newProgress >= currentMilestone.end && currentState.currentProgress < currentMilestone.end) {
-          // Randomly select one of the 5 milestone variants (ids 1-5)
-          const selectedVariant = getRandomMilestoneVariant();
+          // Use pre-calculated next reward (exact amount shown in UI)
+          const selectedVariant = this.state.nextRewardVariantId ?? getRandomMilestoneVariant();
           milestonesReached.push(selectedVariant);
         }
       }
@@ -308,6 +319,7 @@ class GameStore {
     this.state.luckyBoostProgress = newProgress;
     
     this.state.showRewardPopup = false;
+    this.state.rewardClaimed = true; // Mark reward as claimed to prevent showing again
     this.state.currentScreen = 'home';
     this.state.selectedPack = null;
     this.state.lastResult = null;
@@ -330,6 +342,10 @@ class GameStore {
       this.state.creditsStartBalance = undefined;
     }
     
+    this.state.claimedRewardVariantId = undefined; // Clear current claim; modal dismissed
+    // Pre-calculate next reward for next cycle
+    this.state.nextRewardVariantId = getRandomMilestoneVariant();
+    
     saveState(this.state);
     this.notify();
   }
@@ -349,6 +365,103 @@ class GameStore {
     this.notify();
   }
 
+  // TEST ONLY: Simulate a pack open with specific values (for testing/prototyping)
+  // This method is isolated from production logic and should only be used in test mode
+  simulatePackOpen(packPrice: number, cardValue: number): void {
+    // Get a default pack for theme (use first pack as default)
+    const defaultPack = PACKS[0];
+    
+    // Determine rarity based on value relative to pack price
+    let rarity: 'common' | 'rare' | 'epic' | 'legendary' | 'mythic' = 'common';
+    if (cardValue >= packPrice * 1.9) {
+      rarity = 'mythic';
+    } else if (cardValue >= packPrice * 1.1) {
+      rarity = 'legendary';
+    } else if (cardValue >= packPrice) {
+      rarity = 'epic';
+    } else if (cardValue >= packPrice * 0.5) {
+      rarity = 'rare';
+    } else {
+      rarity = 'common';
+    }
+
+    // Create a test card
+    const card: import('./types').Card = {
+      id: `test-card-${Date.now()}`,
+      name: `Test ${rarity} Card`,
+      rarity,
+      value: cardValue,
+    };
+
+    // Deduct pack price from USDC balance (if sufficient)
+    if (this.state.usdcBalance >= packPrice) {
+      this.state.usdcBalance -= packPrice;
+    }
+    this.state.packsOpened += 1;
+
+    // Clear any previous reward popup state
+    this.state.showRewardPopup = false;
+    this.state.showCreditsDropdown = false;
+    this.state.creditsStartBalance = undefined;
+
+    const isWin = cardValue >= packPrice;
+
+    if (!isWin) {
+      // Calculate what the progress update would be
+      const progressAdded = calculateProgress(packPrice, cardValue);
+      
+      // Calculate what milestones would be reached
+      const currentState = luckyBoostStore.getState();
+      const currentMilestone = MILESTONES[currentState.currentMilestoneIndex];
+      let milestonesReached: number[] = [];
+      
+      if (currentMilestone && progressAdded > 0) {
+        const newProgress = currentState.currentProgress + progressAdded;
+        
+        if (newProgress >= currentMilestone.end && currentState.currentProgress < currentMilestone.end) {
+          const selectedVariant = this.state.nextRewardVariantId ?? getRandomMilestoneVariant();
+          milestonesReached.push(selectedVariant);
+        }
+      }
+      
+      // Store pending update
+      const selectedVariant = milestonesReached.length > 0 ? milestonesReached[0] : undefined;
+      this.state.pendingLuckyBoostUpdate = {
+        packPrice,
+        cardValue,
+        milestonesReached,
+        selectedMilestoneVariant: selectedVariant,
+      };
+      
+      // Calculate progress for display
+      const luckyBoostState = luckyBoostStore.getState();
+      const newProgressDollars = luckyBoostState.currentProgress + progressAdded;
+      const newProgress = Math.min(100, Math.max(0, (newProgressDollars / MAX_PROGRESS) * 100));
+      this.state.luckyBoostProgress = newProgress;
+    } else {
+      // Win: don't add to meter
+      this.state.pendingLuckyBoostUpdate = undefined;
+      const luckyBoostState = luckyBoostStore.getState();
+      const currentProgress = Math.min(100, Math.max(0, (luckyBoostState.currentProgress / MAX_PROGRESS) * 100));
+      this.state.luckyBoostProgress = currentProgress;
+    }
+
+    // Create result
+    const result: PackOpenResult = {
+      card,
+      packPrice,
+      isWin,
+      timestamp: Date.now(),
+      theme: defaultPack.theme,
+    };
+
+    this.state.lastResult = result;
+    this.state.currentScreen = 'cardReveal';
+    
+    saveState(this.state);
+    this.notify();
+  }
+
   // Claim reward credits only (e.g. after RewardModal in CardReveal). No navigation, keep lastResult.
   // Note: Credits are already added when milestones are reached in openPack(), so this just resets progress.
   // THIS IS THE ONLY PLACE WHERE showCreditsDropdown SHOULD BE SET TO TRUE
@@ -362,6 +475,7 @@ class GameStore {
     this.state.luckyBoostProgress = newProgress;
     
     this.state.showRewardPopup = false;
+    this.state.rewardClaimed = true; // Mark reward as claimed to prevent showing again
     
     // Show credits toast ONLY if:
     // 1. creditsStartBalance is set (milestone was reached and credits were awarded)
@@ -381,6 +495,10 @@ class GameStore {
       this.state.creditsStartBalance = undefined;
     }
     
+    this.state.claimedRewardVariantId = undefined; // Clear current claim; modal dismissed
+    // Pre-calculate next reward for next cycle
+    this.state.nextRewardVariantId = getRandomMilestoneVariant();
+    
     saveState(this.state);
     this.notify();
   }
@@ -391,10 +509,16 @@ class GameStore {
       return;
     }
 
-    const { packPrice, cardValue, milestonesReached } = this.state.pendingLuckyBoostUpdate;
+    const { packPrice, cardValue, milestonesReached, selectedMilestoneVariant } = this.state.pendingLuckyBoostUpdate;
 
     // Check if we're about to reach a milestone BEFORE adding progress
     const wasAboutToReachMilestone = milestonesReached.length > 0;
+    
+    // If we're reaching a new milestone, reset rewardClaimed and store current claim for modal
+    if (wasAboutToReachMilestone) {
+      this.state.rewardClaimed = false;
+      this.state.claimedRewardVariantId = selectedMilestoneVariant ?? milestonesReached[0];
+    }
     
     // Now actually update the lucky boost store
     luckyBoostStore.addPackOpen(packPrice, cardValue);
@@ -412,6 +536,15 @@ class GameStore {
         // Claim milestone for guaranteed pulls (no credits)
         luckyBoostStore.claimMilestone(milestoneId);
       }
+    }
+    
+    // Mark reward as claimed if we reached a milestone (it's automatically claimed above)
+    // The popup will still show once, but won't show again after user interactions
+    if (wasAboutToReachMilestone) {
+      // Don't set rewardClaimed here - let it be set when user clicks "Claim" button
+      // This allows the popup to show, but prevents it from showing again after claiming
+      // Pre-calculate next reward for next cycle (exact amount shown in UI)
+      this.state.nextRewardVariantId = getRandomMilestoneVariant();
     }
     
     // Add total credits awarded to gameStore credits balance
@@ -440,7 +573,8 @@ class GameStore {
     // We check this BEFORE claiming the milestone, because after claiming, progress is reset
     // NOTE: Don't set showRewardPopup here if we're on cardReveal screen - CardRevealScreen
     // will handle showing RewardModal itself to avoid duplicate popups
-    if (wasAboutToReachMilestone && !this.state.showRewardPopup && this.state.currentScreen !== 'cardReveal') {
+    // Also, don't show if reward has already been claimed
+    if (wasAboutToReachMilestone && !this.state.showRewardPopup && !this.state.rewardClaimed && this.state.currentScreen !== 'cardReveal') {
       // We reached 100% in this pack open, show the reward popup
       this.state.showRewardPopup = true;
     } else if (wasAboutToReachMilestone && this.state.currentScreen === 'cardReveal') {

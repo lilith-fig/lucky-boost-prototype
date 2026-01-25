@@ -86,6 +86,10 @@ export function CardRevealScreen() {
       return;
     }
 
+    // Reset state when a new card is revealed
+    setIsMeterFull(false);
+    setShowRewardModal(false);
+
     // Only show meter and calculate progress if it's a loss (not a win)
     // Wins (20% of packs) don't show meter UI
     const isWin = result.isWin;
@@ -165,14 +169,18 @@ export function CardRevealScreen() {
                 // Play meter full sound
                 sfx.play('meterFull');
                 // Show reward modal after light-up animation completes
-                setTimeout(() => {
-                  // Clear the old reward popup to prevent duplicate popups
-                  // The RewardModal in CardRevealScreen will be shown instead
-                  gameStore.clearRewardPopup();
-                  setShowRewardModal(true);
-                  // Play reward popup sound
-                  sfx.play('rewardPopup');
-                }, 1200);
+                // Only show if reward hasn't been claimed yet
+                const currentState = gameStore.getState();
+                if (!currentState.rewardClaimed) {
+                  setTimeout(() => {
+                    // Clear the old reward popup to prevent duplicate popups
+                    // The RewardModal in CardRevealScreen will be shown instead
+                    gameStore.clearRewardPopup();
+                    setShowRewardModal(true);
+                    // Play reward popup sound
+                    sfx.play('rewardPopup');
+                  }, 1200);
+                }
               } else {
                 // Play meter fill sound during animation
                 sfx.play('meterFill', { volume: 0.5 });
@@ -218,6 +226,8 @@ export function CardRevealScreen() {
   const handleRewardClose = () => {
     setShowRewardModal(false);
     gameStore.claimRewardCreditsOnly();
+    // Reset isMeterFull to prevent showing modal again
+    setIsMeterFull(false);
     // Actions are already shown, no need to delay
     if (!showKeepSell) {
       setShowKeepSell(true);
@@ -310,10 +320,7 @@ export function CardRevealScreen() {
                       setHasSold(true);
                       // Play card-sold.mp3 right after button loading state ends
                       sfx.play('sellCard');
-                      // Only show RewardModal if meter is full (100%)
-                      if (isMeterFull) {
-                        setShowRewardModal(true);
-                      }
+                      // Don't show RewardModal again after claiming - it should only show once after meter loads
                     }, 1000);
                   }}
                   className={isSelling ? 'btn-loading' : ''}
@@ -374,8 +381,8 @@ export function CardRevealScreen() {
         />
       )}
 
-      {/* Reward Modal - shows when meter reaches 100% */}
-      {showRewardModal && (
+      {/* Reward Modal - shows when meter reaches 100% (only once, after meter loads) */}
+      {showRewardModal && !gameStore.getState().rewardClaimed && (
         <RewardModal onClose={handleRewardClose} />
       )}
     </div>

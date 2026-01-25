@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal } from '../../design-system/Modal';
 import { Button } from '../../design-system/Button';
 import { CreditIcon } from '../../components/CreditIcon';
@@ -13,13 +13,22 @@ interface RewardModalProps {
 
 export function RewardModal({ onClose }: RewardModalProps) {
   const sfx = useSFX();
-  // Get the selected milestone variant from pending update, or default to variant 1
-  const state = gameStore.getState();
-  const selectedVariantId = state.pendingLuckyBoostUpdate?.selectedMilestoneVariant || 
-                            state.pendingLuckyBoostUpdate?.milestonesReached?.[0] || 
-                            1;
-  const milestone = MILESTONES.find(m => m.id === selectedVariantId);
-  const rewardAmount = milestone?.reward.credits || 25; // Default to $25 if not found
+  const [gameState, setGameState] = useState(() => gameStore.getState());
+
+  useEffect(() => {
+    const unsubscribe = gameStore.subscribe(() => {
+      setGameState(gameStore.getState());
+    });
+    return unsubscribe;
+  }, []);
+
+  // Show current reward (milestone just claimed), not next reward
+  const claimedVariantId = gameState.claimedRewardVariantId ??
+                           gameState.pendingLuckyBoostUpdate?.selectedMilestoneVariant ??
+                           gameState.pendingLuckyBoostUpdate?.milestonesReached?.[0] ??
+                           1;
+  const milestone = MILESTONES.find(m => m.id === claimedVariantId);
+  const rewardAmount = milestone?.reward.credits ?? 25; // Default to $25 if not found
 
   useEffect(() => {
     // Play reward popup sound when modal opens
@@ -40,7 +49,7 @@ export function RewardModal({ onClose }: RewardModalProps) {
           <div className="reward-earned">
             <span className="reward-earned-label">You've earned</span>
             <CreditIcon size={12} className="reward-currency-icon" />
-            <div className="reward-amount-value">+${rewardAmount}</div>
+            <div className="reward-amount-value">+${rewardAmount.toFixed(2)}</div>
           </div>
         </div>
 
