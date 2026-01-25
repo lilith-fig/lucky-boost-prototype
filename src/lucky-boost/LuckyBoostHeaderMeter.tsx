@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Tooltip } from '../design-system/Tooltip';
 import { useLuckyBoost } from './useLuckyBoost';
-import { getProgressPercentage, getCurrentMilestone, MILESTONES } from './types';
+import { getProgressPercentage, MILESTONES } from './types';
 import { LuckyBoostIcon } from './LuckyBoostIcon';
 import { CreditIcon } from '../components/CreditIcon';
 import { LuckyBoostLogo } from '../components/LuckyBoostLogo';
@@ -16,7 +16,6 @@ export const LuckyBoostHeaderMeter: React.FC<LuckyBoostHeaderMeterProps> = ({ pr
   const state = useLuckyBoost();
   const [gameState, setGameState] = useState(gameStore.getState());
   const percentage = getProgressPercentage(progress);
-  const milestone = getCurrentMilestone(progress);
   
   useEffect(() => {
     const unsubscribe = gameStore.subscribe(() => {
