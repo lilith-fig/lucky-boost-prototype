@@ -13,6 +13,28 @@
   z-index: 1;
 }
 
+.pack-opening-bgm-toggle {
+  position: absolute;
+  bottom: 32px;
+  right: 32px;
+  z-index: 10;
+}
+
+.pack-opening-bgm-toggle .bgm-toggle-button .btn-icon {
+  width: 24px;
+  height: 24px;
+  aspect-ratio: 1/1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pack-opening-bgm-toggle .bgm-toggle-button .btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .opening-animation {
   display: flex;
   flex-direction: column;

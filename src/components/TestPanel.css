@@ -1,14 +1,13 @@
 .test-panel {
-  position: absolute;
-  top: 378px;
-  left: 0px;
-  transform: translateY(-50%);
+  position: fixed;
+  top: 32px;
+  left: 0;
   width: 264px;
-  max-width: calc(90vw - var(--spacing-lg) * 2);
-  max-height: 90vh;
+  max-width: calc(100vw - var(--spacing-lg) * 2);
+  height: calc(100vh - 64px);
   background: var(--global-neutral-grey-90);
   border: 1px solid var(--global-neutral-grey-80);
-  border-radius: var(--radius-lg);
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   z-index: 1000;
   display: flex;
@@ -19,11 +18,11 @@
 
 @keyframes slideInLeft {
   from {
-    transform: translateY(-50%) translateX(-20px);
+    transform: translateX(-100%);
     opacity: 0;
   }
   to {
-    transform: translateY(-50%) translateX(0);
+    transform: translateX(0);
     opacity: 1;
   }
 }

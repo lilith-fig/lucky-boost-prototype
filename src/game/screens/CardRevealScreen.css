@@ -23,6 +23,19 @@
   width: 151px;
 }
 
+.card-reveal-bgm-toggle {
+  position: absolute;
+  bottom: 32px;
+  right: 32px;
+  z-index: 10;
+}
+
+.card-reveal-bgm-toggle .bgm-toggle-button .btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Background with gradient overlay */
 .result-background {
   position: absolute;

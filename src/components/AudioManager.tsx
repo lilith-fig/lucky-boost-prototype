@@ -10,18 +10,19 @@ export function AudioManager() {
 
   useEffect(() => {
     // Start BGM immediately when component mounts (on site visit)
-    // Play flg4.mp3 at 5% volume (0.05), always looping
-    playBGM('main', { loop: true, volume: 0.05 });
-  }, [playBGM]);
-
-  useEffect(() => {
-    // Ensure BGM continues playing always (flg4.mp3 should always be on at 5% volume)
-    // The audioManager will keep it playing regardless of bgmEnabled state
-    if (!state.currentBGM) {
-      // Ensure it's playing (in case it wasn't started)
+    // Only if BGM is enabled
+    if (state.bgmEnabled) {
       playBGM('main', { loop: true, volume: 0.05 });
     }
-  }, [state.currentBGM, playBGM]);
+  }, [playBGM, state.bgmEnabled]);
+
+  useEffect(() => {
+    // Ensure BGM continues playing if enabled and not already playing
+    // Respect bgmEnabled state - don't auto-start if muted
+    if (state.bgmEnabled && !state.currentBGM) {
+      playBGM('main', { loop: true, volume: 0.05 });
+    }
+  }, [state.currentBGM, state.bgmEnabled, playBGM]);
 
   // This component doesn't render anything
   return null;

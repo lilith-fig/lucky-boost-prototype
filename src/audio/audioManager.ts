@@ -26,6 +26,7 @@ const BGM_TRACKS: Record<string, string> = {
 class AudioManagerImpl implements AudioManager {
   private bgmAudio: HTMLAudioElement | null = null;
   private sfxCache: Map<SoundEffect, HTMLAudioElement> = new Map();
+  private bgmUnsubscribe: (() => void) | null = null;
 
   constructor() {
     // Preload audio files (optional, can be done lazily)
@@ -75,6 +76,11 @@ class AudioManagerImpl implements AudioManager {
   playBGM(track: string, options?: { loop?: boolean; volume?: number }): void {
     const state = audioStore.getState();
     
+    // Don't play if BGM is disabled
+    if (!state.bgmEnabled) {
+      return;
+    }
+    
     // If BGM is already playing the same track, don't restart it
     if (this.bgmAudio && !this.bgmAudio.paused && state.currentBGM === track) {
       return;
@@ -98,6 +104,16 @@ class AudioManagerImpl implements AudioManager {
         return;
       }
 
+      // If we have paused audio for the same track, only resume if BGM is enabled
+      if (this.bgmAudio && this.bgmAudio.paused && state.currentBGM === track) {
+        if (state.bgmEnabled) {
+          this.bgmAudio.play().catch((error) => {
+            console.warn(`Failed to resume BGM ${track}:`, error);
+          });
+        }
+        return;
+      }
+
       this.bgmAudio = new Audio(trackPath);
       this.bgmAudio.loop = options?.loop ?? true;
       // Always use 5% volume (0.05) for flg4.mp3
@@ -109,21 +125,28 @@ class AudioManagerImpl implements AudioManager {
         console.warn(`Failed to play BGM ${track}:`, error);
       });
 
-      // Update volume when store changes - but always keep at 5% for flg4.mp3
-      const unsubscribe = audioStore.subscribe(() => {
-        if (this.bgmAudio) {
-          // Always play at 5% volume, regardless of bgmEnabled state
-          this.bgmAudio.volume = 0.05;
-          if (this.bgmAudio.paused) {
-            this.bgmAudio.play().catch(() => {});
-          }
-        }
+      // Clean up any existing subscription before creating a new one
+      if (this.bgmUnsubscribe) {
+        this.bgmUnsubscribe();
+        this.bgmUnsubscribe = null;
+      }
+
+      // Update volume when store changes - respect bgmEnabled state
+      // Don't auto-resume here - let toggleBGM handle resume/pause
+      this.bgmUnsubscribe = audioStore.subscribe(() => {
+        if (!this.bgmAudio) return;
+        const s = audioStore.getState();
+        // Only set volume to 5% if BGM is enabled, otherwise keep at 0
+        this.bgmAudio.volume = s.bgmEnabled ? 0.05 : 0;
       });
 
       // Cleanup subscription when audio ends (if not looping)
       if (!this.bgmAudio.loop) {
         this.bgmAudio.addEventListener('ended', () => {
-          unsubscribe();
+          if (this.bgmUnsubscribe) {
+            this.bgmUnsubscribe();
+            this.bgmUnsubscribe = null;
+          }
         });
       }
     } catch (error) {
@@ -137,6 +160,11 @@ class AudioManagerImpl implements AudioManager {
       this.bgmAudio.currentTime = 0;
       this.bgmAudio = null;
       audioStore.setCurrentBGM(null);
+    }
+    // Clean up subscription when stopping BGM
+    if (this.bgmUnsubscribe) {
+      this.bgmUnsubscribe();
+      this.bgmUnsubscribe = null;
     }
   }
 
@@ -152,13 +180,23 @@ class AudioManagerImpl implements AudioManager {
   }
 
   toggleBGM(): void {
-    audioStore.toggleBGM();
     const state = audioStore.getState();
-    if (state.bgmEnabled && state.currentBGM) {
-      // Resume BGM if it was playing
-      this.playBGM(state.currentBGM);
-    } else if (!state.bgmEnabled && this.bgmAudio) {
-      this.bgmAudio.pause();
+    const newEnabled = !state.bgmEnabled;
+    
+    // Update store state first (this notifies subscribers, button will update)
+    audioStore.setBGMEnabled(newEnabled);
+    
+    // Then control audio directly (don't rely on subscription)
+    if (this.bgmAudio) {
+      if (newEnabled) {
+        // Unmute: resume existing BGM from current position (don't restart)
+        this.bgmAudio.volume = 0.05; // Restore volume
+        this.bgmAudio.play().catch(() => {});
+      } else {
+        // Mute: pause BGM and set volume to 0 as backup
+        this.bgmAudio.pause();
+        this.bgmAudio.volume = 0; // Set to 0 as additional safeguard
+      }
     }
   }
 

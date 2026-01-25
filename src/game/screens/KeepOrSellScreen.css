@@ -72,3 +72,16 @@
   flex-direction: column;
   gap: var(--spacing-md);
 }
+
+.keep-or-sell-bgm-toggle {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 10;
+}
+
+.keep-or-sell-bgm-toggle .bgm-toggle-button .btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
