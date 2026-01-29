@@ -3,8 +3,8 @@ import type { AudioState } from './types';
 const STORAGE_KEY = 'audioSettings';
 
 const defaultState: AudioState = {
-  bgmEnabled: true,
-  sfxEnabled: true,
+  bgmEnabled: false,
+  sfxEnabled: false,
   bgmVolume: 1.0, // Store full volume, but actual playback will be 5% (0.05)
   sfxVolume: 0.7,
   currentBGM: null,

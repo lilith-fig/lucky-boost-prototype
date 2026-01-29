@@ -2,6 +2,7 @@
   min-height: 100vh;
   background-color: #060606;
   color: var(--global-neutral-white);
+  padding-top: 80px; /* Space for floating header */
 }
 
 .home-main {

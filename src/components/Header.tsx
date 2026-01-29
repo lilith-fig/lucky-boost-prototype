@@ -1,19 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { gameStore } from '../game/store';
-import { LuckyBoostHeaderMeter } from '../lucky-boost/LuckyBoostHeaderMeter';
-import { useLuckyBoost } from '../lucky-boost/useLuckyBoost';
-import { Logo } from './Logo';
 import { CurrencyIcon } from './CurrencyIcon';
 import { CreditIcon } from './CreditIcon';
 import { Button } from '../design-system/Button';
 import { CountUpNumber } from './CountUpNumber';
-import { TestButton } from './TestButton';
 import './Header.css';
 
 export function Header() {
   const [state, setState] = useState(gameStore.getState());
-  const luckyBoostState = useLuckyBoost();
   const [showBalanceDropdown, setShowBalanceDropdown] = useState(false);
+  const [activeTab, setActiveTab] = useState<'explore' | 'listings'>('explore');
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const balanceDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -32,15 +28,24 @@ export function Header() {
   return (
     <header className="global-header">
       <div className="header-container">
-        <div className="header-left">
-          <Logo />
+        {/* Category Tabs */}
+        <div className="header-tabs">
+          <button 
+            className={`header-tab ${activeTab === 'explore' ? 'active' : ''}`}
+            onClick={() => setActiveTab('explore')}
+          >
+            Explore
+          </button>
+          <button 
+            className="header-tab disabled"
+            disabled
+            title="Coming soon"
+          >
+            Your listings
+          </button>
         </div>
-        
+
         <div className="header-right">
-          <TestButton />
-          {/* Lucky Boost - compact passive indicator */}
-          <LuckyBoostHeaderMeter progress={luckyBoostState.currentProgress} />
-          
           {/* USDC Balance and Profile - share same dropdown */}
           <div 
             className="balance-profile-group"

@@ -1,15 +1,18 @@
 .global-header {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  top: 16px;
+  left: 106px; /* Align with content (sidebar + gap) */
+  right: 16px;
   z-index: 100;
   background: rgba(16, 16, 16, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(34, 34, 34, 0.8);
+  border: 1px solid rgba(34, 34, 34, 0.8);
+  border-radius: 12px;
   height: fit-content;
   display: flex;
-  align-items: center;
-  width: 100%;
+  justify-content: center;
+  align-items: flex-start;
   padding-top: 12px;
   padding-bottom: 12px;
 }
@@ -17,12 +20,61 @@
 .header-container {
   width: 100%;
   max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 24px;
+  margin: 0 16px;
+  padding: 0;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  height: fit-content;
+}
+
+.header-tabs {
+  display: flex;
   align-items: center;
-  height: 100%;
+  gap: 8px;
+}
+
+.header-tab {
+  position: relative;
+  width: 180px;
+  height: 40px;
+  padding: 8px 16px;
+  background: var(--global-neutral-grey-90, #101010);
+  border: none;
+  border-radius: 4px;
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--global-neutral-grey-50, #4b4b4b);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  overflow: hidden;
+  opacity: 0.8;
+}
+
+.header-tab:hover:not(.active) {
+  background: var(--global-neutral-grey-80, #171717);
+  color: var(--global-neutral-white);
+  opacity: 1;
+}
+
+.header-tab.active {
+  color: var(--global-neutral-white);
+  border-bottom: 2px solid var(--global-brand-primary-10, #ecff6f);
+  opacity: 1;
+}
+
+.header-tab.disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+  color: var(--global-neutral-grey-50, #4b4b4b);
+}
+
+.header-tab.disabled:hover {
+  background: var(--global-neutral-grey-90, #101010);
+  color: var(--global-neutral-grey-50, #4b4b4b);
+  opacity: 0.4;
 }
 
 .header-left {
@@ -31,9 +83,14 @@
 }
 
 .header-right {
+  position: absolute;
+  right: 24px;
   display: flex;
   align-items: center;
   gap: 12px;
+  height: fit-content;
+  width: fit-content;
+  flex-wrap: wrap;
 }
 
 /* Balance and Profile Group - share dropdown */

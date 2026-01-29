@@ -10,7 +10,7 @@ const defaultState: GameState = {
   credits: 0, // Starting credits (separate from USDC)
   packsOpened: 0,
   luckyBoostProgress: 0,
-  currentScreen: 'home',
+  currentScreen: 'marketplace',
   selectedPack: null,
   lastResult: null,
   showRewardPopup: false,
@@ -29,7 +29,7 @@ function loadState(): GameState {
         parsed.credits = 0; // Reset credits to 0
       }
       // Reset balance to default on each session (don't persist balance between sessions)
-      const loadedState = { ...defaultState, ...parsed, currentScreen: 'home', usdcBalance: defaultState.usdcBalance };
+      const loadedState = { ...defaultState, ...parsed, currentScreen: 'marketplace', usdcBalance: defaultState.usdcBalance };
       // Clear credits toast state on load - it should only show when explicitly triggered
       loadedState.showCreditsDropdown = false;
       loadedState.creditsStartBalance = undefined;

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { gameStore } from './game/store';
+import { AppLayout } from './components/AppLayout';
 import { Header } from './components/Header';
 import { HomeScreen } from './game/screens/HomeScreen';
+import { MarketplaceScreen } from './game/screens/MarketplaceScreen';
 import { PackDetailScreen } from './game/screens/PackDetailScreen';
 import { PackOpeningScreen } from './game/screens/PackOpeningScreen';
 import { CardBackScreen } from './game/screens/CardBackScreen';
@@ -14,7 +16,7 @@ import type { Screen } from './game/types';
 import './App.css';
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('home');
+  const [currentScreen, setCurrentScreen] = useState<Screen>('marketplace');
   const [gameState, setGameState] = useState(gameStore.getState());
 
   useEffect(() => {
@@ -37,6 +39,8 @@ function App() {
     switch (currentScreen) {
       case 'home':
         return <HomeScreen />;
+      case 'marketplace':
+        return <MarketplaceScreen />;
       case 'packDetail':
         return <PackDetailScreen />;
       case 'opening':
@@ -46,19 +50,21 @@ function App() {
       case 'cardReveal':
         return <CardRevealScreen />;
       default:
-        return <HomeScreen />;
+        return <MarketplaceScreen />;
     }
   };
 
   return (
-    <div className="app">
+    <AppLayout>
       <AudioManager />
       <Header />
-      {renderScreen()}
+      <main className="app-main-content">
+        {renderScreen()}
+      </main>
       {gameState.showRewardPopup && !gameState.rewardClaimed && <RewardPopup />}
       <Toast />
       <CreditsToast />
-    </div>
+    </AppLayout>
   );
 }
 

@@ -1,0 +1,17 @@
+/* App Layout with Sidebar */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #060606;
+}
+
+.app-layout-content {
+  flex: 1;
+  margin-left: 106px; /* Collapsed sidebar width (58px) + 48px gap */
+  margin-right: 16px;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: margin-left 0.2s ease;
+}
